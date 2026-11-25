@@ -60,26 +60,6 @@
             <v-toolbar-title class="font-weight-bold text-secondary">
                 {{ pageTitle }}
             </v-toolbar-title>
-
-            <v-spacer />
-
-            <div class="d-flex align-center ga-3 mr-4">
-                <div class="text-right d-none d-sm-block">
-                    <div class="text-body-2 font-weight-medium text-secondary">
-                        {{ authStore.user?.name || 'Admin' }}
-                    </div>
-                    <div class="text-caption text-medium-emphasis">
-                        {{ authStore.user?.email }}
-                    </div>
-                </div>
-                <v-btn
-                    icon="mdi-logout"
-                    variant="text"
-                    color="error"
-                    title="Logout"
-                    @click="handleLogout"
-                />
-            </div>
         </v-app-bar>
 
         <v-main class="bg-background">
