@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -252,6 +253,11 @@ class BookingController extends Controller
             Mail::to($recipient)->send(new BookingConfirmation($booking, $subject));
         } catch (\Throwable $e) {
             $status = 'failed';
+            Log::error('Booking confirmation email failed', [
+                'booking_id' => $booking->id,
+                'recipient' => $recipient,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         EmailLog::create([

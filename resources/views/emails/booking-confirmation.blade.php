@@ -3,13 +3,19 @@
 
 Hello **{{ $booking->customer->name }}**,
 
-Thank you for booking with **Car Rental**. Here are your booking details:
+Thank you for booking with **Car Rental**. Here are your official booking receipt details:
 
 <x-mail::panel>
 **Reference Code:** `{{ $booking->reference_code }}`  
 **Status:** {{ strtoupper($booking->status) }}  
 **Booking Date:** {{ $booking->created_at?->format('M d, Y h:i A') }}
 </x-mail::panel>
+
+### Customer Details
+- **Full Name:** {{ $booking->customer->name }}
+- **Email:** {{ $booking->customer->email }}
+- **Contact Number:** {{ $booking->customer->contact_number }}
+- **Address:** {{ $booking->customer->address }}
 
 ### Vehicle Details
 - **Vehicle:** {{ $booking->vehicle->brand }} {{ $booking->vehicle->model }} ({{ $booking->vehicle->year }})
@@ -28,8 +34,8 @@ Thank you for booking with **Car Rental**. Here are your booking details:
 - Please bring a **valid government ID** and your **driver's license** upon pickup.
 - **Late return penalty applies** if the vehicle is returned past the scheduled return date and time.
 
-<x-mail::button :url="url('/track')">
-Track Your Booking
+<x-mail::button :url="url('/receipt/' . $booking->reference_code)">
+View Online Receipt
 </x-mail::button>
 
 Thanks,  

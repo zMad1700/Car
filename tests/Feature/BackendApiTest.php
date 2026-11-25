@@ -89,7 +89,10 @@ class BackendApiTest extends TestCase
         $referenceCode = $bookingRes->json('reference_code');
         $this->assertMatchesRegularExpression('/^BK-\d{8}-[A-Z0-9]{4}$/', $referenceCode);
 
-        Mail::assertSent(BookingConfirmation::class);
+        Mail::assertSent(BookingConfirmation::class, function (BookingConfirmation $mail) use ($referenceCode) {
+            $html = $mail->render();
+            return str_contains($html, $referenceCode) && str_contains($html, 'Juan Dela Cruz');
+        });
         $this->assertDatabaseHas('email_logs', [
             'sent_to' => 'juan@gmail.com',
             'status' => 'sent',
