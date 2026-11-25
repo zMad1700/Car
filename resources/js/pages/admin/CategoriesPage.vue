@@ -1,27 +1,35 @@
 <template>
     <div>
-        <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-6">
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-7">
             <div>
-                <h1 class="text-h4 font-weight-bold text-secondary">
+                <div class="text-caption font-weight-bold text-uppercase mb-1" style="color: #C6A15B; letter-spacing: 0.14em;">
+                    Fleet Classification
+                </div>
+                <h1 class="font-display text-h4 font-weight-bold" style="color: #101D32;">
                     Vehicle Categories
                 </h1>
-                <p class="text-body-2 text-medium-emphasis mt-1">
-                    Manage vehicle classifications used across your fleet.
+                <p class="text-body-2 mt-1" style="color: #777777;">
+                    Organize your luxury and executive fleet classifications.
                 </p>
             </div>
 
-            <v-btn color="primary" prepend-icon="mdi-plus" variant="flat" @click="openCreateDialog">
+            <v-btn
+                color="secondary"
+                prepend-icon="mdi-plus"
+                variant="flat"
+                class="font-weight-bold text-primary px-5"
+                @click="openCreateDialog"
+            >
                 Add Category
             </v-btn>
         </div>
 
-        <v-card elevation="1" border rounded="lg">
-            <v-card-title class="pa-4 d-flex align-center">
+        <v-card class="luxury-card overflow-hidden">
+            <v-card-title class="pa-4">
                 <v-text-field
                     v-model="search"
                     prepend-inner-icon="mdi-magnify"
                     label="Search categories"
-                    variant="outlined"
                     density="compact"
                     hide-details
                     clearable
@@ -37,14 +45,18 @@
                 item-value="id"
                 hover
             >
+                <template #item.name="{ item }">
+                    <span class="font-weight-bold" style="color: #101D32;">{{ item.name }}</span>
+                </template>
+
                 <template #item.description="{ item }">
-                    <span class="text-body-2 text-medium-emphasis">
+                    <span class="text-body-2" style="color: #777777;">
                         {{ item.description || '—' }}
                     </span>
                 </template>
 
                 <template #item.vehicles_count="{ item }">
-                    <v-chip size="small" color="primary" variant="tonal">
+                    <v-chip size="small" color="primary" variant="tonal" class="font-weight-medium">
                         {{ item.vehicles_count ?? 0 }} vehicle(s)
                     </v-chip>
                 </template>
@@ -74,11 +86,11 @@
 
         <!-- Create / Edit Dialog -->
         <v-dialog v-model="formDialog" max-width="520" persistent>
-            <v-card rounded="lg">
-                <v-card-title class="pa-5 font-weight-bold text-secondary">
+            <v-card class="luxury-card">
+                <v-card-title class="pa-5 font-display text-h5 font-weight-bold" style="color: #101D32;">
                     {{ editingId ? 'Edit Category' : 'Add Category' }}
                 </v-card-title>
-                <v-divider />
+                <v-divider style="border-color: #EFECE6;" />
 
                 <v-form ref="formRef" @submit.prevent="saveCategory">
                     <v-card-text class="pa-5">
@@ -95,7 +107,6 @@
                         <v-text-field
                             v-model="form.name"
                             label="Category Name *"
-                            variant="outlined"
                             density="comfortable"
                             :rules="[(v) => !!v?.trim() || 'Category name is required.']"
                             class="mb-3"
@@ -104,20 +115,19 @@
                         <v-textarea
                             v-model="form.description"
                             label="Description"
-                            variant="outlined"
                             density="comfortable"
                             rows="3"
                             auto-grow
                         />
                     </v-card-text>
 
-                    <v-divider />
+                    <v-divider style="border-color: #EFECE6;" />
                     <v-card-actions class="pa-4">
                         <v-spacer />
-                        <v-btn variant="text" color="secondary" :disabled="saving" @click="formDialog = false">
+                        <v-btn variant="text" color="primary" :disabled="saving" @click="formDialog = false">
                             Cancel
                         </v-btn>
-                        <v-btn type="submit" color="primary" variant="flat" :loading="saving">
+                        <v-btn type="submit" color="primary" variant="flat" class="px-5" :loading="saving">
                             {{ editingId ? 'Update' : 'Create' }}
                         </v-btn>
                     </v-card-actions>
@@ -127,8 +137,8 @@
 
         <!-- Delete Confirmation Dialog -->
         <v-dialog v-model="deleteDialog" max-width="420">
-            <v-card rounded="lg">
-                <v-card-title class="pa-5 font-weight-bold text-secondary">
+            <v-card class="luxury-card">
+                <v-card-title class="pa-5 font-display text-h6 font-weight-bold" style="color: #101D32;">
                     Delete Category
                 </v-card-title>
                 <v-card-text class="px-5 pb-4">
@@ -136,7 +146,7 @@
                 </v-card-text>
                 <v-card-actions class="pa-4">
                     <v-spacer />
-                    <v-btn variant="text" color="secondary" :disabled="deleting" @click="deleteDialog = false">
+                    <v-btn variant="text" color="primary" :disabled="deleting" @click="deleteDialog = false">
                         Cancel
                     </v-btn>
                     <v-btn color="error" variant="flat" :loading="deleting" @click="confirmDelete">

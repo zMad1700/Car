@@ -1,23 +1,28 @@
 <template>
     <v-container class="py-10">
         <div class="mb-8">
-            <h1 class="text-h3 font-weight-bold text-secondary mb-2">
+            <div class="text-caption font-weight-bold text-uppercase mb-1" style="color: #C6A15B; letter-spacing: 0.14em;">
+                Our Curated Fleet
+            </div>
+            <h1 class="font-display text-h3 font-weight-bold mb-2" style="color: #101D32;">
                 Available Vehicles
             </h1>
-            <p class="text-body-1 text-medium-emphasis">
-                Choose from our fleet, switch between exterior and interior photos, and book instantly with no account required.
+            <div class="gold-divider mb-3" />
+            <p class="text-body-1" style="color: #777777;">
+                Inspect exterior and interior views of each model and reserve immediately with no account required.
             </p>
         </div>
 
         <!-- Category Filter & Search -->
-        <v-card elevation="1" border rounded="lg" class="pa-4 mb-8">
+        <v-card class="luxury-card pa-4 mb-8">
             <v-row dense align="center">
                 <v-col cols="12" md="7">
                     <div class="d-flex flex-wrap align-center ga-2">
                         <v-chip
-                            :color="selectedCategory === null ? 'primary' : 'default'"
+                            :color="selectedCategory === null ? 'primary' : undefined"
                             :variant="selectedCategory === null ? 'flat' : 'outlined'"
-                            class="cursor-pointer"
+                            class="cursor-pointer font-weight-medium"
+                            :style="selectedCategory === null ? 'border: 1px solid #C6A15B;' : 'border-color: #E6E4DD;'"
                             @click="selectedCategory = null"
                         >
                             All Categories
@@ -25,9 +30,10 @@
                         <v-chip
                             v-for="cat in categories"
                             :key="cat.id"
-                            :color="selectedCategory === cat.id ? 'primary' : 'default'"
+                            :color="selectedCategory === cat.id ? 'primary' : undefined"
                             :variant="selectedCategory === cat.id ? 'flat' : 'outlined'"
-                            class="cursor-pointer"
+                            class="cursor-pointer font-weight-medium"
+                            :style="selectedCategory === cat.id ? 'border: 1px solid #C6A15B;' : 'border-color: #E6E4DD;'"
                             @click="selectedCategory = cat.id"
                         >
                             {{ cat.name }}
@@ -40,7 +46,6 @@
                         v-model="search"
                         prepend-inner-icon="mdi-magnify"
                         label="Search brand or model"
-                        variant="outlined"
                         density="compact"
                         hide-details
                         clearable
@@ -55,7 +60,7 @@
 
         <v-row v-if="loading">
             <v-col v-for="n in 6" :key="n" cols="12" sm="6" md="4">
-                <v-skeleton-loader type="image, article" rounded="lg" border />
+                <v-skeleton-loader type="image, article" rounded="xl" border />
             </v-col>
         </v-row>
 
@@ -81,6 +86,7 @@
                             block
                             size="large"
                             prepend-icon="mdi-calendar-check"
+                            class="font-weight-semibold"
                         >
                             {{ vehicle.status === 'available' ? 'Book Now' : unavailableLabel(vehicle.status) }}
                         </v-btn>

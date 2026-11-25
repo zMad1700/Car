@@ -1,17 +1,26 @@
 <template>
-    <v-container class="fill-height py-12" style="min-height: calc(100vh - 120px);">
+    <v-container class="fill-height py-12" style="min-height: calc(100vh - 140px);">
         <v-row justify="center" align="center">
             <v-col cols="12" sm="8" md="5" lg="4">
-                <v-card elevation="2" border rounded="lg" class="pa-6">
+                <v-card class="luxury-card pa-7" style="border-top: 4px solid #C6A15B !important;">
                     <div class="text-center mb-6">
-                        <v-avatar color="secondary" size="56" class="mb-3">
-                            <v-icon icon="mdi-shield-lock-outline" size="28" color="white" />
+                        <v-avatar
+                            color="primary"
+                            size="60"
+                            rounded="lg"
+                            class="mb-4"
+                            style="border: 1px solid rgba(198, 161, 91, 0.5);"
+                        >
+                            <v-icon icon="mdi-shield-lock-outline" size="28" color="secondary" />
                         </v-avatar>
-                        <h1 class="text-h5 font-weight-bold text-secondary">
+                        <div class="text-caption font-weight-bold text-uppercase mb-1" style="color: #C6A15B; letter-spacing: 0.14em;">
+                            Executive Access
+                        </div>
+                        <h1 class="font-display text-h4 font-weight-bold" style="color: #101D32;">
                             Staff Portal
                         </h1>
-                        <p class="text-body-2 text-medium-emphasis mt-1">
-                            Authorized administrator access only
+                        <p class="text-body-2 mt-1" style="color: #777777;">
+                            Authorized administrator sign-in only
                         </p>
                     </div>
 
@@ -33,7 +42,6 @@
                             label="Admin Email"
                             type="email"
                             prepend-inner-icon="mdi-email-outline"
-                            variant="outlined"
                             density="comfortable"
                             :rules="emailRules"
                             autocomplete="email"
@@ -46,11 +54,10 @@
                             :type="showPassword ? 'text' : 'password'"
                             prepend-inner-icon="mdi-lock-outline"
                             :append-inner-icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
-                            variant="outlined"
                             density="comfortable"
                             :rules="passwordRules"
                             autocomplete="current-password"
-                            class="mb-4"
+                            class="mb-5"
                             @click:append-inner="showPassword = !showPassword"
                         />
 
@@ -61,6 +68,7 @@
                             block
                             variant="flat"
                             :loading="authStore.loading"
+                            class="font-weight-semibold"
                         >
                             Sign In
                         </v-btn>
@@ -71,7 +79,7 @@
                             to="/"
                             variant="text"
                             size="small"
-                            color="secondary"
+                            color="primary"
                             prepend-icon="mdi-arrow-left"
                         >
                             Back to Car Rental

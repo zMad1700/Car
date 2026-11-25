@@ -1,11 +1,14 @@
 <template>
     <div>
-        <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-6">
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-7">
             <div>
-                <h1 class="text-h4 font-weight-bold text-secondary">
+                <div class="text-caption font-weight-bold text-uppercase mb-1" style="color: #C6A15B; letter-spacing: 0.14em;">
+                    Reservation Management
+                </div>
+                <h1 class="font-display text-h4 font-weight-bold" style="color: #101D32;">
                     Bookings
                 </h1>
-                <p class="text-body-2 text-medium-emphasis mt-1">
+                <p class="text-body-2 mt-1" style="color: #777777;">
                     Review customer reservations, inspect details, and confirm or cancel bookings.
                 </p>
             </div>
@@ -21,7 +24,7 @@
             </v-btn>
         </div>
 
-        <v-card elevation="1" border rounded="lg">
+        <v-card class="luxury-card overflow-hidden">
             <v-card-title class="pa-4">
                 <v-row dense align="center">
                     <v-col cols="12" md="4">
@@ -29,7 +32,6 @@
                             v-model="filters.search"
                             prepend-inner-icon="mdi-magnify"
                             label="Search reference, customer, or email"
-                            variant="outlined"
                             density="compact"
                             hide-details
                             clearable
@@ -41,7 +43,6 @@
                             v-model="filters.status"
                             :items="statusOptions"
                             label="Status"
-                            variant="outlined"
                             density="compact"
                             hide-details
                             clearable
@@ -53,7 +54,6 @@
                             v-model="filters.date_from"
                             label="Pickup From"
                             type="date"
-                            variant="outlined"
                             density="compact"
                             hide-details
                             @update:model-value="fetchBookings"
@@ -64,7 +64,6 @@
                             v-model="filters.date_to"
                             label="Pickup To"
                             type="date"
-                            variant="outlined"
                             density="compact"
                             hide-details
                             @update:model-value="fetchBookings"
@@ -74,7 +73,7 @@
                         <v-btn color="primary" variant="flat" size="small" @click="fetchBookings">
                             Filter
                         </v-btn>
-                        <v-btn variant="text" color="secondary" size="small" @click="resetFilters">
+                        <v-btn variant="text" color="primary" size="small" @click="resetFilters">
                             Reset
                         </v-btn>
                     </v-col>
@@ -90,10 +89,10 @@
             >
                 <template #item.reference_code="{ item }">
                     <div class="py-2">
-                        <div class="font-weight-bold text-primary">
+                        <div class="font-weight-bold" style="color: #101D32;">
                             {{ item.reference_code }}
                         </div>
-                        <div class="text-caption text-medium-emphasis">
+                        <div class="text-caption" style="color: #777777;">
                             {{ formatDateTime(item.created_at) }}
                         </div>
                     </div>
@@ -101,10 +100,10 @@
 
                 <template #item.customer="{ item }">
                     <div class="py-2">
-                        <div class="font-weight-medium text-secondary">
+                        <div class="font-weight-medium" style="color: #252525;">
                             {{ item.customer?.name || '—' }}
                         </div>
-                        <div class="text-caption text-medium-emphasis">
+                        <div class="text-caption" style="color: #777777;">
                             {{ item.customer?.email }} &bull; {{ item.customer?.contact_number }}
                         </div>
                     </div>
@@ -112,10 +111,10 @@
 
                 <template #item.vehicle="{ item }">
                     <div class="py-2">
-                        <div class="font-weight-medium text-secondary">
+                        <div class="font-weight-medium" style="color: #252525;">
                             {{ item.vehicle?.brand }} {{ item.vehicle?.model }}
                         </div>
-                        <div class="text-caption text-medium-emphasis">
+                        <div class="text-caption" style="color: #777777;">
                             {{ item.vehicle?.plate_number }}
                             <span v-if="item.vehicle?.category">
                                 &bull; {{ item.vehicle.category.name }}
@@ -127,17 +126,17 @@
                 <template #item.schedule="{ item }">
                     <div class="text-body-2 py-2">
                         <div>{{ formatDateTime(item.pickup_date) }}</div>
-                        <div class="text-caption text-medium-emphasis">
+                        <div class="text-caption" style="color: #777777;">
                             to {{ formatDateTime(item.return_date) }} ({{ item.total_days }}d)
                         </div>
                     </div>
                 </template>
 
                 <template #item.total_amount="{ item }">
-                    <div class="font-weight-bold text-secondary">
+                    <div class="font-weight-bold" style="color: #101D32;">
                         PHP {{ formatMoney(item.total_amount) }}
                     </div>
-                    <div class="text-caption text-medium-emphasis">
+                    <div class="text-caption" style="color: #777777;">
                         PHP {{ formatMoney(item.daily_rate) }}/day
                     </div>
                 </template>
@@ -181,28 +180,31 @@
 
         <!-- Booking Details Dialog -->
         <v-dialog v-model="detailsDialog" max-width="820">
-            <v-card rounded="lg">
+            <v-card class="luxury-card">
                 <v-card-title class="pa-5 d-flex align-center justify-space-between">
                     <div>
-                        <span class="font-weight-bold text-secondary">
-                            Booking {{ detailBooking?.reference_code }}
+                        <div class="text-caption font-weight-bold text-uppercase" style="color: #C6A15B; letter-spacing: 0.12em;">
+                            Booking Summary
+                        </div>
+                        <span class="font-display text-h5 font-weight-bold" style="color: #101D32;">
+                            {{ detailBooking?.reference_code }}
                         </span>
-                        <div class="text-caption text-medium-emphasis">
+                        <div class="text-caption" style="color: #777777;">
                             Booked on {{ formatDateTime(detailBooking?.created_at) }}
                         </div>
                     </div>
                     <BookingStatusChip v-if="detailBooking" :status="detailBooking.status" />
                 </v-card-title>
-                <v-divider />
+                <v-divider style="border-color: #EFECE6;" />
 
                 <v-card-text class="pa-5">
-                    <v-progress-linear v-if="loadingDetails" indeterminate color="primary" class="mb-4" />
+                    <v-progress-linear v-if="loadingDetails" indeterminate color="secondary" class="mb-4" />
 
                     <template v-if="detailBooking">
                         <v-row>
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" rounded="lg" class="pa-4 h-100">
-                                    <div class="text-overline text-primary font-weight-bold mb-2">
+                                <v-card variant="outlined" rounded="lg" class="pa-4 h-100" style="border-color: #E6E4DD;">
+                                    <div class="text-caption font-weight-bold text-uppercase mb-2" style="color: #C6A15B; letter-spacing: 0.1em;">
                                         Customer Details
                                     </div>
                                     <div class="text-body-2 mb-1">
@@ -221,8 +223,8 @@
                             </v-col>
 
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" rounded="lg" class="pa-4 h-100">
-                                    <div class="text-overline text-primary font-weight-bold mb-2">
+                                <v-card variant="outlined" rounded="lg" class="pa-4 h-100" style="border-color: #E6E4DD;">
+                                    <div class="text-caption font-weight-bold text-uppercase mb-2" style="color: #C6A15B; letter-spacing: 0.1em;">
                                         Vehicle Details
                                     </div>
                                     <div class="text-body-2 mb-1">
@@ -244,26 +246,26 @@
                             </v-col>
 
                             <v-col cols="12">
-                                <v-card variant="tonal" color="primary" rounded="lg" class="pa-4">
+                                <v-card color="primary" rounded="lg" class="pa-4 text-white" style="border-bottom: 3px solid #C6A15B;">
                                     <v-row dense>
                                         <v-col cols="12" sm="4">
-                                            <div class="text-caption text-uppercase font-weight-bold">Pickup</div>
+                                            <div class="text-caption text-uppercase font-weight-bold" style="color: #C6A15B;">Pickup</div>
                                             <div class="text-body-2 font-weight-medium">
                                                 {{ formatDateTime(detailBooking.pickup_date) }}
                                             </div>
                                         </v-col>
                                         <v-col cols="12" sm="4">
-                                            <div class="text-caption text-uppercase font-weight-bold">Return</div>
+                                            <div class="text-caption text-uppercase font-weight-bold" style="color: #C6A15B;">Return</div>
                                             <div class="text-body-2 font-weight-medium">
                                                 {{ formatDateTime(detailBooking.return_date) }}
                                             </div>
                                         </v-col>
                                         <v-col cols="12" sm="4">
-                                            <div class="text-caption text-uppercase font-weight-bold">Total</div>
+                                            <div class="text-caption text-uppercase font-weight-bold" style="color: #C6A15B;">Total</div>
                                             <div class="text-subtitle-1 font-weight-bold">
                                                 PHP {{ formatMoney(detailBooking.total_amount) }}
                                             </div>
-                                            <div class="text-caption">
+                                            <div class="text-caption" style="color: rgba(255,255,255,0.75);">
                                                 {{ detailBooking.total_days }} day(s) &times; PHP {{ formatMoney(detailBooking.daily_rate) }}
                                             </div>
                                         </v-col>
@@ -273,11 +275,11 @@
 
                             <!-- Payments & Rental Summary -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" rounded="lg" class="pa-4 h-100">
-                                    <div class="text-overline text-secondary font-weight-bold mb-2">
+                                <v-card variant="outlined" rounded="lg" class="pa-4 h-100" style="border-color: #E6E4DD;">
+                                    <div class="text-caption font-weight-bold text-uppercase mb-2" style="color: #777777; letter-spacing: 0.1em;">
                                         Payments ({{ detailBooking.payments?.length || 0 }})
                                     </div>
-                                    <div v-if="!detailBooking.payments?.length" class="text-body-2 text-medium-emphasis">
+                                    <div v-if="!detailBooking.payments?.length" class="text-body-2" style="color: #777777;">
                                         No payments recorded yet.
                                     </div>
                                     <v-list v-else density="compact" class="pa-0">
@@ -300,11 +302,11 @@
 
                             <!-- Email Logs -->
                             <v-col cols="12" md="6">
-                                <v-card variant="outlined" rounded="lg" class="pa-4 h-100">
-                                    <div class="text-overline text-secondary font-weight-bold mb-2">
+                                <v-card variant="outlined" rounded="lg" class="pa-4 h-100" style="border-color: #E6E4DD;">
+                                    <div class="text-caption font-weight-bold text-uppercase mb-2" style="color: #777777; letter-spacing: 0.1em;">
                                         Email Logs ({{ detailBooking.email_logs?.length || 0 }})
                                     </div>
-                                    <div v-if="!detailBooking.email_logs?.length" class="text-body-2 text-medium-emphasis">
+                                    <div v-if="!detailBooking.email_logs?.length" class="text-body-2" style="color: #777777;">
                                         No emails logged.
                                     </div>
                                     <v-list v-else density="compact" class="pa-0">
@@ -337,12 +339,13 @@
                     </template>
                 </v-card-text>
 
-                <v-divider />
+                <v-divider style="border-color: #EFECE6;" />
                 <v-card-actions class="pa-4">
                     <v-btn
                         v-if="detailBooking?.status === 'pending'"
-                        color="success"
+                        color="secondary"
                         variant="flat"
+                        class="font-weight-bold text-primary"
                         prepend-icon="mdi-check"
                         @click="openActionDialog(detailBooking, 'confirm')"
                     >
@@ -358,7 +361,7 @@
                         Cancel Booking
                     </v-btn>
                     <v-spacer />
-                    <v-btn variant="text" color="secondary" @click="detailsDialog = false">
+                    <v-btn variant="text" color="primary" @click="detailsDialog = false">
                         Close
                     </v-btn>
                 </v-card-actions>
@@ -367,8 +370,8 @@
 
         <!-- Confirm / Cancel Action Dialog -->
         <v-dialog v-model="actionDialog" max-width="460">
-            <v-card rounded="lg">
-                <v-card-title class="pa-5 font-weight-bold text-secondary">
+            <v-card class="luxury-card">
+                <v-card-title class="pa-5 font-display text-h6 font-weight-bold" style="color: #101D32;">
                     {{ actionType === 'confirm' ? 'Confirm Booking' : 'Cancel Booking' }}
                 </v-card-title>
                 <v-card-text class="px-5 pb-4">
@@ -378,17 +381,17 @@
                         booking <strong>{{ actionTarget?.reference_code }}</strong> for
                         <strong>{{ actionTarget?.customer?.name }}</strong>?
                     </p>
-                    <p class="text-caption text-medium-emphasis mb-0">
+                    <p class="text-caption mb-0" style="color: #777777;">
                         A status update email will be sent to {{ actionTarget?.customer?.email }} and logged automatically.
                     </p>
                 </v-card-text>
                 <v-card-actions class="pa-4">
                     <v-spacer />
-                    <v-btn variant="text" color="secondary" :disabled="acting" @click="actionDialog = false">
+                    <v-btn variant="text" color="primary" :disabled="acting" @click="actionDialog = false">
                         Back
                     </v-btn>
                     <v-btn
-                        :color="actionType === 'confirm' ? 'success' : 'error'"
+                        :color="actionType === 'confirm' ? 'primary' : 'error'"
                         variant="flat"
                         :loading="acting"
                         @click="submitAction"

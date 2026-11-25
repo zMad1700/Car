@@ -11,21 +11,50 @@ const vuetify = createVuetify({
             mdi,
         },
     },
+    defaults: {
+        VBtn: {
+            rounded: 'lg',
+            elevation: 0,
+        },
+        VCard: {
+            rounded: 'xl',
+            elevation: 0,
+        },
+        VTextField: {
+            variant: 'outlined',
+            color: 'primary',
+            rounded: 'lg',
+        },
+        VSelect: {
+            variant: 'outlined',
+            color: 'primary',
+            rounded: 'lg',
+        },
+        VTextarea: {
+            variant: 'outlined',
+            color: 'primary',
+            rounded: 'lg',
+        },
+    },
     theme: {
-        defaultTheme: 'light',
+        defaultTheme: 'luxuryLight',
         themes: {
-            light: {
+            luxuryLight: {
                 dark: false,
                 colors: {
-                    primary: '#1E40AF',
-                    secondary: '#0F172A',
-                    accent: '#F59E0B',
-                    background: '#F8FAFC',
+                    primary: '#101D32',
+                    secondary: '#C6A15B',
+                    accent: '#C6A15B',
+                    background: '#F5F5F2',
                     surface: '#FFFFFF',
-                    info: '#0284C7',
-                    success: '#16A34A',
-                    warning: '#D97706',
-                    error: '#DC2626',
+                    'on-surface': '#252525',
+                    'on-background': '#252525',
+                    'on-primary': '#FFFFFF',
+                    'on-secondary': '#101D32',
+                    info: '#1D4E89',
+                    success: '#2E7D5B',
+                    warning: '#B9812A',
+                    error: '#B83B3B',
                 },
             },
         },

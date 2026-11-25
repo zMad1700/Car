@@ -1,22 +1,22 @@
 <template>
     <v-container class="py-10">
-        <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-6" />
+        <v-progress-linear v-if="loading" indeterminate color="secondary" class="mb-6" />
 
         <v-alert v-else-if="error" type="error" variant="tonal" class="mb-6">
             {{ error }}
         </v-alert>
 
-        <v-card v-else-if="booking" max-width="820" class="mx-auto pa-6 pa-sm-8" elevation="2" border rounded="lg">
+        <v-card v-else-if="booking" max-width="820" class="luxury-card mx-auto pa-6 pa-sm-9" style="border-top: 4px solid #101D32 !important;">
             <!-- Header -->
             <div class="d-flex flex-wrap align-center justify-space-between ga-4 mb-6">
                 <div>
-                    <div class="text-overline text-primary font-weight-bold">
+                    <div class="text-caption font-weight-bold text-uppercase mb-1" style="color: #C6A15B; letter-spacing: 0.14em;">
                         Car Rental — Official Booking Receipt
                     </div>
-                    <h1 class="text-h4 font-weight-bold text-secondary">
+                    <h1 class="font-display text-h4 font-weight-bold" style="color: #101D32;">
                         {{ booking.reference_code }}
                     </h1>
-                    <div class="text-caption text-medium-emphasis">
+                    <div class="text-caption mt-1" style="color: #777777;">
                         Booked on {{ formatDateTime(booking.created_at) }}
                     </div>
                 </div>
@@ -25,15 +25,15 @@
             </div>
 
             <v-alert type="success" variant="tonal" density="comfortable" class="mb-6 d-print-none">
-                Your booking has been submitted! Save your reference code
+                Your reservation has been submitted. Save your reference code
                 <strong>{{ booking.reference_code }}</strong>. A copy of this receipt has also been sent to
                 <strong>{{ booking.customer?.email }}</strong>.
             </v-alert>
 
             <v-row class="mb-4">
                 <v-col cols="12" sm="6">
-                    <v-card variant="outlined" rounded="lg" class="pa-4 h-100">
-                        <div class="text-overline text-primary font-weight-bold mb-2">
+                    <v-card variant="outlined" rounded="lg" class="pa-5 h-100" style="border-color: #E6E4DD;">
+                        <div class="text-caption font-weight-bold text-uppercase mb-3" style="color: #C6A15B; letter-spacing: 0.12em;">
                             Customer Details
                         </div>
                         <div class="text-body-2 mb-1">
@@ -52,8 +52,8 @@
                 </v-col>
 
                 <v-col cols="12" sm="6">
-                    <v-card variant="outlined" rounded="lg" class="pa-4 h-100">
-                        <div class="text-overline text-primary font-weight-bold mb-2">
+                    <v-card variant="outlined" rounded="lg" class="pa-5 h-100" style="border-color: #E6E4DD;">
+                        <div class="text-caption font-weight-bold text-uppercase mb-3" style="color: #C6A15B; letter-spacing: 0.12em;">
                             Vehicle Details
                         </div>
                         <div class="text-body-2 mb-1">
@@ -75,35 +75,41 @@
             </v-row>
 
             <!-- Schedule & Breakdown -->
-            <v-card variant="tonal" color="primary" rounded="lg" class="pa-5 mb-6">
+            <v-card color="primary" rounded="lg" class="pa-6 mb-6 text-white" style="border-bottom: 3px solid #C6A15B;">
                 <v-row>
                     <v-col cols="12" sm="6">
-                        <div class="text-caption text-uppercase font-weight-bold">Pickup Date &amp; Time</div>
-                        <div class="text-subtitle-1 font-weight-bold">
+                        <div class="text-caption text-uppercase font-weight-bold" style="color: #C6A15B; letter-spacing: 0.1em;">
+                            Pickup Date &amp; Time
+                        </div>
+                        <div class="text-subtitle-1 font-weight-bold mt-1">
                             {{ formatDateTime(booking.pickup_date) }}
                         </div>
                     </v-col>
                     <v-col cols="12" sm="6">
-                        <div class="text-caption text-uppercase font-weight-bold">Return Date &amp; Time</div>
-                        <div class="text-subtitle-1 font-weight-bold">
+                        <div class="text-caption text-uppercase font-weight-bold" style="color: #C6A15B; letter-spacing: 0.1em;">
+                            Return Date &amp; Time
+                        </div>
+                        <div class="text-subtitle-1 font-weight-bold mt-1">
                             {{ formatDateTime(booking.return_date) }}
                         </div>
                     </v-col>
                 </v-row>
 
-                <v-divider class="my-4" />
+                <v-divider class="my-4" style="border-color: rgba(198, 161, 91, 0.3);" />
 
-                <div class="d-flex justify-space-between text-body-2 mb-1">
+                <div class="d-flex justify-space-between text-body-2 mb-1" style="color: rgba(255,255,255,0.8);">
                     <span>Daily Rate</span>
                     <span>PHP {{ formatMoney(booking.daily_rate) }}</span>
                 </div>
-                <div class="d-flex justify-space-between text-body-2 mb-2">
+                <div class="d-flex justify-space-between text-body-2 mb-3" style="color: rgba(255,255,255,0.8);">
                     <span>Total Days</span>
                     <span>{{ booking.total_days }} day(s)</span>
                 </div>
-                <div class="d-flex justify-space-between text-h5 font-weight-bold">
-                    <span>Total Amount</span>
-                    <span>PHP {{ formatMoney(booking.total_amount) }}</span>
+                <div class="d-flex justify-space-between align-baseline">
+                    <span class="text-subtitle-1 font-weight-bold">Total Amount</span>
+                    <span class="font-display text-h4 font-weight-bold" style="color: #C6A15B;">
+                        PHP {{ formatMoney(booking.total_amount) }}
+                    </span>
                 </div>
             </v-card>
 
@@ -118,14 +124,20 @@
 
             <!-- Print & Navigation Buttons -->
             <div class="d-flex flex-wrap ga-3 d-print-none">
-                <v-btn color="primary" variant="flat" prepend-icon="mdi-printer" @click="printReceipt">
+                <v-btn
+                    color="secondary"
+                    variant="flat"
+                    prepend-icon="mdi-printer"
+                    class="font-weight-bold text-primary px-6"
+                    @click="printReceipt"
+                >
                     Print Receipt
                 </v-btn>
-                <v-btn to="/cars" variant="outlined" color="secondary" prepend-icon="mdi-car-multiple">
+                <v-btn to="/cars" variant="outlined" color="primary" prepend-icon="mdi-car-multiple">
                     Browse More Cars
                 </v-btn>
                 <v-spacer />
-                <v-btn to="/" variant="text" color="secondary">
+                <v-btn to="/" variant="text" color="primary">
                     Back to Home
                 </v-btn>
             </div>

@@ -1,23 +1,27 @@
 <template>
     <v-container class="py-10">
-        <div class="mb-6">
-            <v-btn to="/cars" variant="text" color="secondary" prepend-icon="mdi-arrow-left" class="px-0 mb-2">
-                Back to Cars
+        <div class="mb-7">
+            <v-btn to="/cars" variant="text" color="primary" prepend-icon="mdi-arrow-left" class="px-0 mb-2">
+                Back to Fleet
             </v-btn>
-            <h1 class="text-h3 font-weight-bold text-secondary">
+            <div class="text-caption font-weight-bold text-uppercase mb-1" style="color: #C6A15B; letter-spacing: 0.14em;">
+                Reservation Request
+            </div>
+            <h1 class="font-display text-h3 font-weight-bold" style="color: #101D32;">
                 Book a Vehicle
             </h1>
-            <p class="text-body-1 text-medium-emphasis mt-1">
+            <div class="gold-divider mt-2 mb-3" />
+            <p class="text-body-1" style="color: #777777;">
                 Complete your reservation details below. No customer account required.
             </p>
         </div>
 
-        <v-progress-linear v-if="loadingVehicles" indeterminate color="primary" class="mb-6" />
+        <v-progress-linear v-if="loadingVehicles" indeterminate color="secondary" class="mb-6" />
 
         <v-row>
             <!-- Booking Form -->
             <v-col cols="12" md="7">
-                <v-card elevation="1" border rounded="lg" class="pa-6">
+                <v-card class="luxury-card pa-6 pa-sm-7">
                     <v-alert
                         v-if="errorMessage"
                         type="error"
@@ -37,7 +41,6 @@
                             item-value="id"
                             label="Select Vehicle *"
                             prepend-inner-icon="mdi-car"
-                            variant="outlined"
                             density="comfortable"
                             :rules="[(v) => !!v || 'Please select an available vehicle.']"
                             class="mb-3"
@@ -49,7 +52,6 @@
                                     v-model="form.name"
                                     label="Full Name *"
                                     prepend-inner-icon="mdi-account-outline"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="[(v) => !!v?.trim() || 'Full name is required.']"
                                 />
@@ -59,7 +61,6 @@
                                     v-model="form.contact_number"
                                     label="Contact Number *"
                                     prepend-inner-icon="mdi-phone-outline"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="contactRules"
                                 />
@@ -71,7 +72,6 @@
                             label="Gmail / Email Address *"
                             type="email"
                             prepend-inner-icon="mdi-email-outline"
-                            variant="outlined"
                             density="comfortable"
                             :rules="emailRules"
                             hint="Your booking receipt and reference code will be sent here."
@@ -83,7 +83,6 @@
                             v-model="form.address"
                             label="Complete Address *"
                             prepend-inner-icon="mdi-map-marker-outline"
-                            variant="outlined"
                             density="comfortable"
                             rows="2"
                             auto-grow
@@ -97,7 +96,6 @@
                                     v-model="form.pickup_date"
                                     label="Pickup Date & Time *"
                                     type="datetime-local"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="pickupRules"
                                 />
@@ -107,7 +105,6 @@
                                     v-model="form.return_date"
                                     label="Return Date & Time *"
                                     type="datetime-local"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="returnRules"
                                 />
@@ -121,7 +118,7 @@
                             class="mt-1 mb-4"
                         >
                             <template #label>
-                                <span class="text-body-2">
+                                <span class="text-body-2" style="color: #252525;">
                                     I agree to bring a valid government ID &amp; driver's license on pickup, and understand that a late return penalty applies.
                                 </span>
                             </template>
@@ -129,13 +126,14 @@
 
                         <v-btn
                             type="submit"
-                            color="primary"
+                            color="secondary"
                             size="x-large"
                             block
                             variant="flat"
                             :loading="submitting"
                             :disabled="!availableVehicles.length"
                             prepend-icon="mdi-check-circle-outline"
+                            class="font-weight-bold text-primary"
                         >
                             Confirm Booking
                         </v-btn>
@@ -147,30 +145,30 @@
             <v-col cols="12" md="5">
                 <VehicleCard v-if="selectedVehicle" :vehicle="selectedVehicle" class="mb-4" />
 
-                <v-card elevation="1" border rounded="lg" class="pa-5">
-                    <div class="text-overline text-primary font-weight-bold mb-3">
+                <v-card class="luxury-card pa-6" style="border-top: 3px solid #C6A15B !important;">
+                    <div class="text-caption font-weight-bold text-uppercase mb-3" style="color: #C6A15B; letter-spacing: 0.12em;">
                         Estimated Booking Summary
                     </div>
 
                     <div class="d-flex justify-space-between text-body-2 mb-2">
-                        <span class="text-medium-emphasis">Daily Rate</span>
-                        <span class="font-weight-medium">
+                        <span style="color: #777777;">Daily Rate</span>
+                        <span class="font-weight-medium" style="color: #252525;">
                             PHP {{ formatMoney(selectedVehicle?.daily_rate || 0) }}
                         </span>
                     </div>
 
                     <div class="d-flex justify-space-between text-body-2 mb-3">
-                        <span class="text-medium-emphasis">Total Days (minimum 1)</span>
-                        <span class="font-weight-medium">{{ estimatedDays }} day(s)</span>
+                        <span style="color: #777777;">Total Days (minimum 1)</span>
+                        <span class="font-weight-medium" style="color: #252525;">{{ estimatedDays }} day(s)</span>
                     </div>
 
-                    <v-divider class="mb-3" />
+                    <v-divider class="mb-3" style="border-color: #EFECE6;" />
 
                     <div class="d-flex justify-space-between align-baseline">
-                        <span class="text-subtitle-1 font-weight-bold text-secondary">
+                        <span class="text-subtitle-1 font-weight-bold" style="color: #101D32;">
                             Estimated Total
                         </span>
-                        <span class="text-h5 font-weight-bold text-primary">
+                        <span class="font-display text-h4 font-weight-bold" style="color: #101D32;">
                             PHP {{ formatMoney(estimatedTotal) }}
                         </span>
                     </div>

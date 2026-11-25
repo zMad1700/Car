@@ -1,33 +1,42 @@
 <template>
     <div>
-        <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-6">
+        <div class="d-flex flex-wrap align-center justify-space-between ga-3 mb-7">
             <div>
-                <h1 class="text-h4 font-weight-bold text-secondary">
+                <div class="text-caption font-weight-bold text-uppercase mb-1" style="color: #C6A15B; letter-spacing: 0.14em;">
+                    Fleet Management
+                </div>
+                <h1 class="font-display text-h4 font-weight-bold" style="color: #101D32;">
                     Vehicles
                 </h1>
-                <p class="text-body-2 text-medium-emphasis mt-1">
-                    Manage your rental fleet, pricing, availability status, exterior &amp; interior photos.
+                <p class="text-body-2 mt-1" style="color: #777777;">
+                    Curate your fleet, daily rental rates, availability status, and exterior &amp; interior photos.
                 </p>
             </div>
 
             <div class="d-flex align-center ga-3">
                 <v-btn-toggle v-model="viewMode" mandatory density="compact" variant="outlined" color="primary">
                     <v-btn value="grid" prepend-icon="mdi-view-grid-outline" size="small">
-                        Boxes
+                        Cards
                     </v-btn>
                     <v-btn value="table" prepend-icon="mdi-table" size="small">
                         Table
                     </v-btn>
                 </v-btn-toggle>
 
-                <v-btn color="primary" prepend-icon="mdi-plus" variant="flat" @click="openCreateDialog">
+                <v-btn
+                    color="secondary"
+                    prepend-icon="mdi-plus"
+                    variant="flat"
+                    class="font-weight-bold text-primary px-5"
+                    @click="openCreateDialog"
+                >
                     Add Vehicle
                 </v-btn>
             </div>
         </div>
 
         <!-- Filters -->
-        <v-card elevation="1" border rounded="lg" class="mb-6">
+        <v-card class="luxury-card mb-6">
             <v-card-text class="pa-4">
                 <v-row dense align="center">
                     <v-col cols="12" sm="4">
@@ -35,7 +44,6 @@
                             v-model="search"
                             prepend-inner-icon="mdi-magnify"
                             label="Search brand, model, or plate"
-                            variant="outlined"
                             density="compact"
                             hide-details
                             clearable
@@ -48,7 +56,6 @@
                             item-title="name"
                             item-value="id"
                             label="Filter by Category"
-                            variant="outlined"
                             density="compact"
                             hide-details
                             clearable
@@ -59,7 +66,6 @@
                             v-model="filterStatus"
                             :items="statusOptions"
                             label="Filter by Status"
-                            variant="outlined"
                             density="compact"
                             hide-details
                             clearable
@@ -69,9 +75,9 @@
             </v-card-text>
         </v-card>
 
-        <!-- Box / Card Grid View -->
+        <!-- Card / Box Grid View -->
         <div v-if="viewMode === 'grid'">
-            <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
+            <v-progress-linear v-if="loading" indeterminate color="secondary" class="mb-4" />
 
             <v-alert v-if="!loading && filteredVehicles.length === 0" type="info" variant="tonal">
                 No vehicles match your current filters.
@@ -88,6 +94,15 @@
                     <VehicleCard :vehicle="vehicle" show-plate>
                         <template #actions>
                             <v-btn
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                prepend-icon="mdi-eye-outline"
+                                @click="openViewDialog(vehicle)"
+                            >
+                                View
+                            </v-btn>
+                            <v-btn
                                 variant="tonal"
                                 color="primary"
                                 size="small"
@@ -101,11 +116,10 @@
                                 variant="text"
                                 color="error"
                                 size="small"
-                                prepend-icon="mdi-delete-outline"
+                                icon="mdi-delete-outline"
+                                title="Delete Vehicle"
                                 @click="openDeleteDialog(vehicle)"
-                            >
-                                Delete
-                            </v-btn>
+                            />
                         </template>
                     </VehicleCard>
                 </v-col>
@@ -113,7 +127,7 @@
         </div>
 
         <!-- Table View -->
-        <v-card v-else elevation="1" border rounded="lg">
+        <v-card v-else class="luxury-card overflow-hidden">
             <v-data-table
                 :headers="headers"
                 :items="filteredVehicles"
@@ -123,15 +137,15 @@
             >
                 <template #item.vehicle="{ item }">
                     <div class="d-flex align-center ga-3 py-2">
-                        <v-avatar rounded="md" size="56" color="grey-lighten-3">
+                        <v-avatar rounded="lg" size="56" color="grey-lighten-3">
                             <v-img v-if="item.image_url" :src="item.image_url" cover />
                             <v-icon v-else icon="mdi-car" color="grey-darken-1" />
                         </v-avatar>
                         <div>
-                            <div class="font-weight-bold text-secondary">
+                            <div class="font-weight-bold" style="color: #101D32;">
                                 {{ item.brand }} {{ item.model }} ({{ item.year }})
                             </div>
-                            <div class="text-caption text-medium-emphasis">
+                            <div class="text-caption" style="color: #777777;">
                                 Plate: {{ item.plate_number }} &bull; {{ item.color }}
                             </div>
                         </div>
@@ -149,7 +163,7 @@
                 </template>
 
                 <template #item.daily_rate="{ item }">
-                    <span class="font-weight-medium">
+                    <span class="font-weight-bold" style="color: #101D32;">
                         PHP {{ Number(item.daily_rate).toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
                     </span>
                 </template>
@@ -160,6 +174,14 @@
 
                 <template #item.actions="{ item }">
                     <div class="d-flex justify-end ga-1">
+                        <v-btn
+                            icon="mdi-eye-outline"
+                            size="small"
+                            variant="text"
+                            color="primary"
+                            title="View"
+                            @click="openViewDialog(item)"
+                        />
                         <v-btn
                             icon="mdi-pencil-outline"
                             size="small"
@@ -181,13 +203,99 @@
             </v-data-table>
         </v-card>
 
+        <!-- View Vehicle Details Dialog -->
+        <v-dialog v-model="viewDialog" max-width="780">
+            <v-card v-if="viewingVehicle" class="luxury-card">
+                <v-card-title class="pa-5 d-flex align-center justify-space-between">
+                    <div>
+                        <div class="text-caption font-weight-bold text-uppercase" style="color: #C6A15B; letter-spacing: 0.12em;">
+                            {{ viewingVehicle.category?.name || 'Vehicle' }} &bull; {{ viewingVehicle.plate_number }}
+                        </div>
+                        <div class="font-display text-h5 font-weight-bold" style="color: #101D32;">
+                            {{ viewingVehicle.brand }} {{ viewingVehicle.model }} ({{ viewingVehicle.year }})
+                        </div>
+                    </div>
+                    <VehicleStatusChip :status="viewingVehicle.status" />
+                </v-card-title>
+                <v-divider style="border-color: #EFECE6;" />
+
+                <v-card-text class="pa-5">
+                    <v-row class="mb-4">
+                        <v-col cols="12" sm="6">
+                            <div class="text-caption font-weight-bold mb-1" style="color: #777777;">EXTERIOR PHOTO</div>
+                            <v-img
+                                v-if="viewingVehicle.image_url"
+                                :src="viewingVehicle.image_url"
+                                height="200"
+                                cover
+                                class="rounded-lg border"
+                            />
+                            <v-sheet v-else height="200" color="#EFECE6" class="rounded-lg d-flex align-center justify-center">
+                                <v-icon icon="mdi-car" size="48" color="grey" />
+                            </v-sheet>
+                        </v-col>
+                        <v-col cols="12" sm="6">
+                            <div class="text-caption font-weight-bold mb-1" style="color: #777777;">INTERIOR PHOTO</div>
+                            <v-img
+                                v-if="viewingVehicle.interior_image_url"
+                                :src="viewingVehicle.interior_image_url"
+                                height="200"
+                                cover
+                                class="rounded-lg border"
+                            />
+                            <v-sheet v-else height="200" color="#EFECE6" class="rounded-lg d-flex align-center justify-center">
+                                <v-icon icon="mdi-car-seat" size="48" color="grey" />
+                            </v-sheet>
+                        </v-col>
+                    </v-row>
+
+                    <v-row dense>
+                        <v-col cols="6" sm="3">
+                            <div class="text-caption" style="color: #777777;">Color</div>
+                            <div class="font-weight-bold">{{ viewingVehicle.color }}</div>
+                        </v-col>
+                        <v-col cols="6" sm="3">
+                            <div class="text-caption" style="color: #777777;">Transmission</div>
+                            <div class="font-weight-bold text-capitalize">{{ viewingVehicle.transmission }}</div>
+                        </v-col>
+                        <v-col cols="6" sm="3">
+                            <div class="text-caption" style="color: #777777;">Seats</div>
+                            <div class="font-weight-bold">{{ viewingVehicle.seats }} Seats</div>
+                        </v-col>
+                        <v-col cols="6" sm="3">
+                            <div class="text-caption" style="color: #777777;">Daily Rate</div>
+                            <div class="font-weight-bold" style="color: #101D32;">
+                                PHP {{ Number(viewingVehicle.daily_rate).toLocaleString('en-PH', { minimumFractionDigits: 2 }) }}
+                            </div>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+
+                <v-divider style="border-color: #EFECE6;" />
+                <v-card-actions class="pa-4">
+                    <v-btn
+                        color="primary"
+                        variant="tonal"
+                        prepend-icon="mdi-pencil-outline"
+                        @click="viewDialog = false; openEditDialog(viewingVehicle)"
+                    >
+                        Edit Vehicle
+                    </v-btn>
+                    <v-spacer />
+                    <v-btn variant="text" color="primary" @click="viewDialog = false">
+                        Close
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
         <!-- Create / Edit Vehicle Dialog -->
         <v-dialog v-model="formDialog" max-width="800" persistent>
-            <v-card rounded="lg">
-                <v-card-title class="pa-5 font-weight-bold text-secondary">
+            <v-card class="luxury-card">
+                <v-card-title class="pa-5 font-display text-h5 font-weight-bold" style="color: #101D32;">
                     {{ editingId ? 'Edit Vehicle' : 'Add Vehicle' }}
                 </v-card-title>
-                <v-divider />
+                <v-divider style="border-color: #EFECE6;" />
 
                 <v-form ref="formRef" @submit.prevent="saveVehicle">
                     <v-card-text class="pa-5">
@@ -209,7 +317,6 @@
                                     item-title="name"
                                     item-value="id"
                                     label="Category *"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="[(v) => !!v || 'Category is required.']"
                                 />
@@ -219,7 +326,6 @@
                                 <v-text-field
                                     v-model="form.plate_number"
                                     label="Plate Number *"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="[(v) => !!v?.trim() || 'Plate number is required.']"
                                 />
@@ -229,7 +335,6 @@
                                 <v-text-field
                                     v-model="form.brand"
                                     label="Brand *"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="[(v) => !!v?.trim() || 'Brand is required.']"
                                 />
@@ -239,7 +344,6 @@
                                 <v-text-field
                                     v-model="form.model"
                                     label="Model *"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="[(v) => !!v?.trim() || 'Model is required.']"
                                 />
@@ -250,7 +354,6 @@
                                     v-model.number="form.year"
                                     label="Year *"
                                     type="number"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="yearRules"
                                 />
@@ -260,7 +363,6 @@
                                 <v-text-field
                                     v-model="form.color"
                                     label="Color *"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="[(v) => !!v?.trim() || 'Color is required.']"
                                 />
@@ -271,7 +373,6 @@
                                     v-model="form.transmission"
                                     :items="['automatic', 'manual']"
                                     label="Transmission *"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="[(v) => !!v || 'Transmission is required.']"
                                 />
@@ -282,7 +383,6 @@
                                     v-model.number="form.seats"
                                     label="Seats *"
                                     type="number"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="seatRules"
                                 />
@@ -294,7 +394,6 @@
                                     label="Daily Rate (PHP) *"
                                     type="number"
                                     step="0.01"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="rateRules"
                                 />
@@ -305,7 +404,6 @@
                                     v-model="form.status"
                                     :items="statusOptions"
                                     label="Status *"
-                                    variant="outlined"
                                     density="comfortable"
                                     :rules="[(v) => !!v || 'Status is required.']"
                                 />
@@ -329,7 +427,7 @@
                                     :src="imagePreview"
                                     height="150"
                                     cover
-                                    class="mt-2 rounded border bg-grey-lighten-4"
+                                    class="mt-2 rounded-lg border bg-grey-lighten-4"
                                 />
                             </v-col>
 
@@ -351,19 +449,25 @@
                                     :src="interiorPreview"
                                     height="150"
                                     cover
-                                    class="mt-2 rounded border bg-grey-lighten-4"
+                                    class="mt-2 rounded-lg border bg-grey-lighten-4"
                                 />
                             </v-col>
                         </v-row>
                     </v-card-text>
 
-                    <v-divider />
+                    <v-divider style="border-color: #EFECE6;" />
                     <v-card-actions class="pa-4">
                         <v-spacer />
-                        <v-btn variant="text" color="secondary" :disabled="saving" @click="formDialog = false">
+                        <v-btn variant="text" color="primary" :disabled="saving" @click="formDialog = false">
                             Cancel
                         </v-btn>
-                        <v-btn type="submit" color="primary" variant="flat" :loading="saving">
+                        <v-btn
+                            type="submit"
+                            color="primary"
+                            variant="flat"
+                            class="px-5"
+                            :loading="saving"
+                        >
                             {{ editingId ? 'Update Vehicle' : 'Save Vehicle' }}
                         </v-btn>
                     </v-card-actions>
@@ -373,8 +477,8 @@
 
         <!-- Delete Confirmation Dialog -->
         <v-dialog v-model="deleteDialog" max-width="440">
-            <v-card rounded="lg">
-                <v-card-title class="pa-5 font-weight-bold text-secondary">
+            <v-card class="luxury-card">
+                <v-card-title class="pa-5 font-display text-h6 font-weight-bold" style="color: #101D32;">
                     Delete Vehicle
                 </v-card-title>
                 <v-card-text class="px-5 pb-4">
@@ -383,7 +487,7 @@
                 </v-card-text>
                 <v-card-actions class="pa-4">
                     <v-spacer />
-                    <v-btn variant="text" color="secondary" :disabled="deleting" @click="deleteDialog = false">
+                    <v-btn variant="text" color="primary" :disabled="deleting" @click="deleteDialog = false">
                         Cancel
                     </v-btn>
                     <v-btn color="error" variant="flat" :loading="deleting" @click="confirmDelete">
@@ -412,6 +516,9 @@ const loading = ref(false);
 const search = ref('');
 const filterCategory = ref(null);
 const filterStatus = ref(null);
+
+const viewDialog = ref(false);
+const viewingVehicle = ref(null);
 
 const formDialog = ref(false);
 const deleteDialog = ref(false);
@@ -536,6 +643,11 @@ async function fetchData() {
     } finally {
         loading.value = false;
     }
+}
+
+function openViewDialog(item) {
+    viewingVehicle.value = item;
+    viewDialog.value = true;
 }
 
 function openCreateDialog() {

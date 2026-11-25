@@ -1,11 +1,19 @@
 <template>
     <v-container class="py-16">
-        <v-card max-width="560" class="mx-auto pa-8 text-center" elevation="1" border rounded="lg">
-            <v-icon :icon="icon" size="56" color="primary" class="mb-4" />
-            <h1 class="text-h4 font-weight-bold text-secondary mb-2">
+        <v-card max-width="560" class="luxury-card mx-auto pa-8 text-center">
+            <v-avatar
+                color="primary"
+                size="64"
+                rounded="lg"
+                class="mb-4"
+                style="border: 1px solid rgba(198, 161, 91, 0.45);"
+            >
+                <v-icon :icon="icon" size="30" color="secondary" />
+            </v-avatar>
+            <h1 class="font-display text-h4 font-weight-bold mb-2" style="color: #101D32;">
                 {{ title }}
             </h1>
-            <p class="text-body-1 text-medium-emphasis mb-6">
+            <p class="text-body-1 mb-6" style="color: #777777;">
                 {{ description }}
             </p>
             <v-btn to="/" color="primary" variant="flat" prepend-icon="mdi-arrow-left">
