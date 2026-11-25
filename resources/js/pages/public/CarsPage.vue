@@ -13,40 +13,19 @@
             </p>
         </div>
 
-        <!-- Category Filter, Available Models Selector & Search -->
+        <!-- Available Models Selector & Search -->
         <v-card class="luxury-card pa-4 mb-8">
             <v-row dense align="center">
-                <v-col cols="12" md="8">
+                <v-col cols="12" md="7">
                     <div class="d-flex flex-wrap align-center ga-2">
-                        <v-chip
-                            :color="selectedCategory === null && !selectedVehicleId ? 'primary' : undefined"
-                            :variant="selectedCategory === null && !selectedVehicleId ? 'flat' : 'outlined'"
-                            class="cursor-pointer font-weight-medium"
-                            :style="selectedCategory === null && !selectedVehicleId ? 'border: 1px solid #C6A15B;' : 'border-color: #E6E4DD;'"
-                            @click="selectCategory(null)"
-                        >
-                            All Categories
-                        </v-chip>
-                        <v-chip
-                            v-for="cat in categories"
-                            :key="cat.id"
-                            :color="selectedCategory === cat.id ? 'primary' : undefined"
-                            :variant="selectedCategory === cat.id ? 'flat' : 'outlined'"
-                            class="cursor-pointer font-weight-medium"
-                            :style="selectedCategory === cat.id ? 'border: 1px solid #C6A15B;' : 'border-color: #E6E4DD;'"
-                            @click="selectCategory(cat.id)"
-                        >
-                            {{ cat.name }}
-                        </v-chip>
-
                         <v-btn
                             color="secondary"
                             variant="flat"
-                            size="small"
+                            size="default"
                             rounded="pill"
                             prepend-icon="mdi-car-multiple"
                             append-icon="mdi-chevron-down"
-                            class="font-weight-bold text-primary px-4"
+                            class="font-weight-bold text-primary px-5"
                             @click="modelsDialog = true"
                         >
                             Available Models ({{ availableVehicles.length }})
@@ -65,7 +44,7 @@
                     </div>
                 </v-col>
 
-                <v-col cols="12" md="4">
+                <v-col cols="12" md="5">
                     <v-text-field
                         v-model="search"
                         prepend-inner-icon="mdi-magnify"
@@ -218,8 +197,6 @@ import api from '@/plugins/axios';
 import VehicleCard from '@/components/VehicleCard.vue';
 
 const vehicles = ref([]);
-const categories = ref([]);
-const selectedCategory = ref(null);
 const selectedVehicleId = ref(null);
 const modelsDialog = ref(false);
 const search = ref('');
@@ -237,9 +214,6 @@ const selectedVehicle = computed(() =>
 const filteredVehicles = computed(() => {
     return vehicles.value.filter((vehicle) => {
         if (selectedVehicleId.value && vehicle.id !== selectedVehicleId.value) {
-            return false;
-        }
-        if (selectedCategory.value && vehicle.category_id !== selectedCategory.value) {
             return false;
         }
         if (search.value?.trim()) {
@@ -260,13 +234,7 @@ function formatMoney(value) {
     });
 }
 
-function selectCategory(categoryId) {
-    selectedVehicleId.value = null;
-    selectedCategory.value = categoryId;
-}
-
 function selectModel(vehicleId) {
-    selectedCategory.value = null;
     selectedVehicleId.value = vehicleId;
     modelsDialog.value = false;
 }
@@ -282,12 +250,8 @@ async function fetchCatalog() {
     loading.value = true;
     error.value = '';
     try {
-        const [vehiclesRes, categoriesRes] = await Promise.all([
-            api.get('/vehicles'),
-            api.get('/categories'),
-        ]);
-        vehicles.value = vehiclesRes.data;
-        categories.value = categoriesRes.data;
+        const { data } = await api.get('/vehicles');
+        vehicles.value = data;
     } catch (err) {
         error.value = err.response?.data?.message || 'Unable to load vehicles.';
     } finally {
