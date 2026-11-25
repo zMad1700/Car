@@ -12,6 +12,7 @@ import DashboardPage from '@/pages/admin/DashboardPage.vue';
 import VehiclesPage from '@/pages/admin/VehiclesPage.vue';
 import CategoriesPage from '@/pages/admin/CategoriesPage.vue';
 import BookingsPage from '@/pages/admin/BookingsPage.vue';
+import RentalsPage from '@/pages/admin/RentalsPage.vue';
 
 const routes = [
     {
@@ -93,12 +94,7 @@ const routes = [
             {
                 path: 'rentals',
                 name: 'admin.rentals',
-                component: PlaceholderPage,
-                props: {
-                    title: 'Rentals Management',
-                    description: 'Vehicle release and return will be implemented in Phase 8.',
-                    icon: 'mdi-key-chain-variant',
-                },
+                component: RentalsPage,
                 meta: { title: 'Admin - Rentals', pageTitle: 'Rentals' },
             },
             {
