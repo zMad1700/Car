@@ -2,10 +2,9 @@
     <v-app>
         <v-navigation-drawer
             v-model="drawer"
-            color="primary"
-            theme="dark"
+            color="#101D32"
             width="264"
-            class="border-0"
+            class="border-0 admin-sidebar"
         >
             <!-- Brand Header -->
             <div class="pa-5 d-flex align-center">
@@ -16,7 +15,7 @@
                     class="mr-3"
                     style="border: 1px solid rgba(198, 161, 91, 0.45);"
                 >
-                    <v-icon icon="mdi-car-sports" color="secondary" size="24" />
+                    <v-icon icon="mdi-car-sports" color="#C6A15B" size="24" />
                 </v-avatar>
                 <div>
                     <div class="font-display text-h6 font-weight-bold text-white" style="line-height: 1.15;">
@@ -30,7 +29,7 @@
 
             <v-divider style="border-color: rgba(198, 161, 91, 0.22);" />
 
-            <div class="px-4 pt-4 pb-1 text-caption font-weight-bold" style="color: rgba(255, 255, 255, 0.48); letter-spacing: 0.12em; text-transform: uppercase;">
+            <div class="px-4 pt-4 pb-1 text-caption font-weight-bold" style="color: rgba(255, 255, 255, 0.5); letter-spacing: 0.12em; text-transform: uppercase;">
                 Management
             </div>
 
@@ -120,21 +119,30 @@ async function handleLogout() {
 
 <style scoped>
 .admin-nav-item {
-    color: rgba(255, 255, 255, 0.78) !important;
+    color: rgba(255, 255, 255, 0.84) !important;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .admin-nav-item :deep(.v-icon) {
-    color: rgba(198, 161, 91, 0.85) !important;
+    color: #C6A15B !important;
+    opacity: 1 !important;
+}
+
+.admin-nav-item:hover {
+    background-color: rgba(198, 161, 91, 0.14) !important;
 }
 
 .admin-nav-item.v-list-item--active {
-    background-color: rgba(198, 161, 91, 0.16) !important;
-    color: #FFFFFF !important;
-    border-left: 3px solid #C6A15B;
+    background-color: #C6A15B !important;
+    color: #101D32 !important;
+    font-weight: 700 !important;
+}
+
+.admin-nav-item.v-list-item--active :deep(.v-list-item-title) {
+    font-weight: 700 !important;
 }
 
 .admin-nav-item.v-list-item--active :deep(.v-icon) {
-    color: #C6A15B !important;
+    color: #101D32 !important;
 }
 </style>

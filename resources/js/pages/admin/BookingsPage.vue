@@ -70,7 +70,7 @@
                         />
                     </v-col>
                     <v-col cols="12" md="2" class="d-flex ga-2">
-                        <v-btn color="primary" variant="flat" size="small" @click="fetchBookings">
+                        <v-btn color="secondary" variant="flat" size="small" class="font-weight-bold text-primary" @click="fetchBookings">
                             Filter
                         </v-btn>
                         <v-btn variant="text" color="primary" size="small" @click="resetFilters">
