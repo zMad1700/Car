@@ -32,14 +32,6 @@
                     <v-btn to="/track" variant="text" color="primary" class="text-body-2 font-weight-medium">
                         Track Booking
                     </v-btn>
-                    <v-btn
-                        to="/cars"
-                        color="secondary"
-                        variant="flat"
-                        class="ml-2 d-none d-sm-inline-flex font-weight-bold text-primary px-5"
-                    >
-                        Book Now
-                    </v-btn>
                 </div>
             </v-container>
         </v-app-bar>
