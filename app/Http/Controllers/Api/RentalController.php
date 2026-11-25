@@ -46,6 +46,12 @@ class RentalController extends Controller
             ], 422);
         }
 
+        if ($booking->vehicle->status === 'maintenance') {
+            return response()->json([
+                'message' => 'Cannot release a vehicle currently under maintenance.',
+            ], 422);
+        }
+
         $rental = DB::transaction(function () use ($validated, $booking, $request) {
             $rental = Rental::create([
                 'booking_id' => $booking->id,

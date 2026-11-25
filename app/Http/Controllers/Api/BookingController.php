@@ -55,7 +55,7 @@ class BookingController extends Controller
             'address' => ['required', 'string', 'max:500'],
             'contact_number' => ['required', 'string', 'max:50'],
             'email' => ['required', 'email', 'max:255'],
-            'pickup_date' => ['required', 'date', 'after_or_equal:now'],
+            'pickup_date' => ['required', 'date', 'after_or_equal:' . now()->subMinutes(5)->toDateTimeString()],
             'return_date' => ['required', 'date', 'after:pickup_date'],
             'terms_accepted' => ['required', 'accepted'],
         ]);

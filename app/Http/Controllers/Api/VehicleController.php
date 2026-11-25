@@ -49,8 +49,10 @@ class VehicleController extends Controller
             $validated['image'] = $request->file('image')->store('vehicles', 'public');
         }
 
+        $validated['status'] = $validated['status'] ?? 'available';
+
         $vehicle = Vehicle::create($validated);
-        $vehicle->load('category');
+        $vehicle->refresh()->load('category');
 
         return response()->json($vehicle, 201);
     }
