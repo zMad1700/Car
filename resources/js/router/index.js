@@ -8,6 +8,7 @@ import StaffPortalLogin from '@/pages/public/StaffPortalLogin.vue';
 import DashboardPage from '@/pages/admin/DashboardPage.vue';
 import VehiclesPage from '@/pages/admin/VehiclesPage.vue';
 import CategoriesPage from '@/pages/admin/CategoriesPage.vue';
+import BookingsPage from '@/pages/admin/BookingsPage.vue';
 
 const routes = [
     {
@@ -76,12 +77,7 @@ const routes = [
             {
                 path: 'bookings',
                 name: 'admin.bookings',
-                component: PlaceholderPage,
-                props: {
-                    title: 'Bookings Management',
-                    description: 'Bookings management will be implemented in Phase 8.',
-                    icon: 'mdi-calendar-check-outline',
-                },
+                component: BookingsPage,
                 meta: { title: 'Admin - Bookings', pageTitle: 'Bookings' },
             },
             {
