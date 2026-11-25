@@ -3,6 +3,9 @@ import { useAuthStore } from '@/stores/auth';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import HomePage from '@/pages/public/HomePage.vue';
+import CarsPage from '@/pages/public/CarsPage.vue';
+import BookingPage from '@/pages/public/BookingPage.vue';
+import ReceiptPage from '@/pages/public/ReceiptPage.vue';
 import PlaceholderPage from '@/pages/public/PlaceholderPage.vue';
 import StaffPortalLogin from '@/pages/public/StaffPortalLogin.vue';
 import DashboardPage from '@/pages/admin/DashboardPage.vue';
@@ -24,13 +27,20 @@ const routes = [
             {
                 path: 'cars',
                 name: 'cars',
-                component: PlaceholderPage,
-                props: {
-                    title: 'Available Vehicles',
-                    description: 'Vehicle browsing and booking will be added in Phases 5 & 6.',
-                    icon: 'mdi-car-multiple',
-                },
+                component: CarsPage,
                 meta: { title: 'Car Rental - Cars' },
+            },
+            {
+                path: 'book/:vehicleId?',
+                name: 'book',
+                component: BookingPage,
+                meta: { title: 'Car Rental - Book a Vehicle' },
+            },
+            {
+                path: 'receipt/:referenceCode',
+                name: 'receipt',
+                component: ReceiptPage,
+                meta: { title: 'Car Rental - Booking Receipt' },
             },
             {
                 path: 'track',

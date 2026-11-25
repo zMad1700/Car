@@ -7,6 +7,7 @@ use App\Models\Vehicle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
@@ -45,8 +46,10 @@ class VehicleController extends Controller
     {
         $validated = $this->validateVehicle($request);
 
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('vehicles', 'public');
+        foreach (['image', 'interior_image'] as $field) {
+            if ($request->hasFile($field)) {
+                $validated[$field] = $request->file($field)->store('vehicles', 'public');
+            }
         }
 
         $validated['status'] = $validated['status'] ?? 'available';
@@ -68,11 +71,11 @@ class VehicleController extends Controller
     {
         $validated = $this->validateVehicle($request, $vehicle->id);
 
-        if ($request->hasFile('image')) {
-            if ($vehicle->image) {
-                Storage::disk('public')->delete($vehicle->image);
+        foreach (['image', 'interior_image'] as $field) {
+            if ($request->hasFile($field)) {
+                $this->deleteStoredImage($vehicle->{$field});
+                $validated[$field] = $request->file($field)->store('vehicles', 'public');
             }
-            $validated['image'] = $request->file('image')->store('vehicles', 'public');
         }
 
         $vehicle->update($validated);
@@ -89,15 +92,21 @@ class VehicleController extends Controller
             ], 422);
         }
 
-        if ($vehicle->image) {
-            Storage::disk('public')->delete($vehicle->image);
-        }
+        $this->deleteStoredImage($vehicle->image);
+        $this->deleteStoredImage($vehicle->interior_image);
 
         $vehicle->delete();
 
         return response()->json([
             'message' => 'Vehicle deleted successfully.',
         ]);
+    }
+
+    private function deleteStoredImage(?string $path): void
+    {
+        if ($path && ! Str::startsWith($path, 'images/')) {
+            Storage::disk('public')->delete($path);
+        }
     }
 
     private function validateVehicle(Request $request, ?int $ignoreId = null): array
@@ -119,6 +128,7 @@ class VehicleController extends Controller
             'daily_rate' => ['required', 'numeric', 'min:0'],
             'status' => ['sometimes', Rule::in(['available', 'booked', 'rented', 'maintenance'])],
             'image' => ['nullable', 'image', 'max:2048'],
+            'interior_image' => ['nullable', 'image', 'max:2048'],
         ]);
     }
 }

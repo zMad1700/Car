@@ -1,6 +1,6 @@
 <template>
     <v-app>
-        <v-app-bar color="white" elevation="1" border="b">
+        <v-app-bar color="white" elevation="1" border="b" class="d-print-none">
             <v-container class="d-flex align-center py-0">
                 <router-link
                     to="/"
@@ -38,7 +38,7 @@
             <router-view />
         </v-main>
 
-        <v-footer color="secondary" class="py-4">
+        <v-footer color="secondary" class="py-4 d-print-none">
             <v-container class="d-flex align-center justify-space-between text-body-2 text-grey-lighten-1">
                 <span>&copy; {{ currentYear }} Car Rental. All rights reserved.</span>
 

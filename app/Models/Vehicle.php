@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Vehicle extends Model
 {
@@ -24,11 +24,13 @@ class Vehicle extends Model
         'seats',
         'daily_rate',
         'image',
+        'interior_image',
         'status',
     ];
 
     protected $appends = [
         'image_url',
+        'interior_image_url',
     ];
 
     protected function casts(): array
@@ -43,8 +45,32 @@ class Vehicle extends Model
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->image ? Storage::disk('public')->url($this->image) : null,
+            get: fn () => $this->resolveAssetUrl($this->image),
         );
+    }
+
+    protected function interiorImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->resolveAssetUrl($this->interior_image),
+        );
+    }
+
+    private function resolveAssetUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (Str::startsWith($path, ['http://', 'https://', '/'])) {
+            return $path;
+        }
+
+        if (Str::startsWith($path, 'images/')) {
+            return '/' . $path;
+        }
+
+        return '/storage/' . ltrim($path, '/');
     }
 
     public function category(): BelongsTo

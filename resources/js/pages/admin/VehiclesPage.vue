@@ -6,17 +6,29 @@
                     Vehicles
                 </h1>
                 <p class="text-body-2 text-medium-emphasis mt-1">
-                    Manage your rental fleet, pricing, availability status, and vehicle photos.
+                    Manage your rental fleet, pricing, availability status, exterior &amp; interior photos.
                 </p>
             </div>
 
-            <v-btn color="primary" prepend-icon="mdi-plus" variant="flat" @click="openCreateDialog">
-                Add Vehicle
-            </v-btn>
+            <div class="d-flex align-center ga-3">
+                <v-btn-toggle v-model="viewMode" mandatory density="compact" variant="outlined" color="primary">
+                    <v-btn value="grid" prepend-icon="mdi-view-grid-outline" size="small">
+                        Boxes
+                    </v-btn>
+                    <v-btn value="table" prepend-icon="mdi-table" size="small">
+                        Table
+                    </v-btn>
+                </v-btn-toggle>
+
+                <v-btn color="primary" prepend-icon="mdi-plus" variant="flat" @click="openCreateDialog">
+                    Add Vehicle
+                </v-btn>
+            </div>
         </div>
 
-        <v-card elevation="1" border rounded="lg">
-            <v-card-title class="pa-4">
+        <!-- Filters -->
+        <v-card elevation="1" border rounded="lg" class="mb-6">
+            <v-card-text class="pa-4">
                 <v-row dense align="center">
                     <v-col cols="12" sm="4">
                         <v-text-field
@@ -54,8 +66,54 @@
                         />
                     </v-col>
                 </v-row>
-            </v-card-title>
+            </v-card-text>
+        </v-card>
 
+        <!-- Box / Card Grid View -->
+        <div v-if="viewMode === 'grid'">
+            <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
+
+            <v-alert v-if="!loading && filteredVehicles.length === 0" type="info" variant="tonal">
+                No vehicles match your current filters.
+            </v-alert>
+
+            <v-row v-else>
+                <v-col
+                    v-for="vehicle in filteredVehicles"
+                    :key="vehicle.id"
+                    cols="12"
+                    sm="6"
+                    lg="4"
+                >
+                    <VehicleCard :vehicle="vehicle" show-plate>
+                        <template #actions>
+                            <v-btn
+                                variant="tonal"
+                                color="primary"
+                                size="small"
+                                prepend-icon="mdi-pencil-outline"
+                                @click="openEditDialog(vehicle)"
+                            >
+                                Edit
+                            </v-btn>
+                            <v-spacer />
+                            <v-btn
+                                variant="text"
+                                color="error"
+                                size="small"
+                                prepend-icon="mdi-delete-outline"
+                                @click="openDeleteDialog(vehicle)"
+                            >
+                                Delete
+                            </v-btn>
+                        </template>
+                    </VehicleCard>
+                </v-col>
+            </v-row>
+        </div>
+
+        <!-- Table View -->
+        <v-card v-else elevation="1" border rounded="lg">
             <v-data-table
                 :headers="headers"
                 :items="filteredVehicles"
@@ -65,7 +123,7 @@
             >
                 <template #item.vehicle="{ item }">
                     <div class="d-flex align-center ga-3 py-2">
-                        <v-avatar rounded="md" size="52" color="grey-lighten-3">
+                        <v-avatar rounded="md" size="56" color="grey-lighten-3">
                             <v-img v-if="item.image_url" :src="item.image_url" cover />
                             <v-icon v-else icon="mdi-car" color="grey-darken-1" />
                         </v-avatar>
@@ -124,7 +182,7 @@
         </v-card>
 
         <!-- Create / Edit Vehicle Dialog -->
-        <v-dialog v-model="formDialog" max-width="760" persistent>
+        <v-dialog v-model="formDialog" max-width="800" persistent>
             <v-card rounded="lg">
                 <v-card-title class="pa-5 font-weight-bold text-secondary">
                     {{ editingId ? 'Edit Vehicle' : 'Add Vehicle' }}
@@ -253,24 +311,46 @@
                                 />
                             </v-col>
 
-                            <v-col cols="12">
+                            <!-- Exterior Photo -->
+                            <v-col cols="12" sm="6">
                                 <v-file-input
                                     v-model="imageInput"
-                                    label="Vehicle Photo (optional, max 2MB)"
+                                    label="Exterior Photo (max 2MB)"
                                     accept="image/*"
-                                    prepend-icon="mdi-camera-outline"
+                                    prepend-icon="mdi-car-side"
                                     variant="outlined"
                                     density="comfortable"
                                     show-size
                                     clearable
-                                    @update:model-value="onImageSelected"
+                                    @update:model-value="onExteriorSelected"
                                 />
-
                                 <v-img
                                     v-if="imagePreview"
                                     :src="imagePreview"
-                                    max-height="180"
-                                    contain
+                                    height="150"
+                                    cover
+                                    class="mt-2 rounded border bg-grey-lighten-4"
+                                />
+                            </v-col>
+
+                            <!-- Interior Photo -->
+                            <v-col cols="12" sm="6">
+                                <v-file-input
+                                    v-model="interiorInput"
+                                    label="Interior Photo (picture sa sulod)"
+                                    accept="image/*"
+                                    prepend-icon="mdi-car-seat"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    show-size
+                                    clearable
+                                    @update:model-value="onInteriorSelected"
+                                />
+                                <v-img
+                                    v-if="interiorPreview"
+                                    :src="interiorPreview"
+                                    height="150"
+                                    cover
                                     class="mt-2 rounded border bg-grey-lighten-4"
                                 />
                             </v-col>
@@ -322,8 +402,10 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import api from '@/plugins/axios';
+import VehicleCard from '@/components/VehicleCard.vue';
 import VehicleStatusChip from '@/components/VehicleStatusChip.vue';
 
+const viewMode = ref('grid');
 const vehicles = ref([]);
 const categories = ref([]);
 const loading = ref(false);
@@ -343,6 +425,10 @@ const formError = ref('');
 const imageInput = ref(null);
 const selectedFile = ref(null);
 const imagePreview = ref(null);
+
+const interiorInput = ref(null);
+const selectedInteriorFile = ref(null);
+const interiorPreview = ref(null);
 
 const statusOptions = ['available', 'booked', 'rented', 'maintenance'];
 
@@ -414,17 +500,26 @@ function notify(text, color = 'success') {
     snackbar.show = true;
 }
 
-function onImageSelected(value) {
+function handleFileSelection(value, fileRef, previewRef, existingUrl) {
     const file = Array.isArray(value) ? value[0] : value;
-    selectedFile.value = file || null;
-    if (selectedFile.value) {
-        imagePreview.value = URL.createObjectURL(selectedFile.value);
+    fileRef.value = file || null;
+    if (fileRef.value) {
+        previewRef.value = URL.createObjectURL(fileRef.value);
     } else if (editingId.value) {
-        const existing = vehicles.value.find((v) => v.id === editingId.value);
-        imagePreview.value = existing?.image_url || null;
+        previewRef.value = existingUrl || null;
     } else {
-        imagePreview.value = null;
+        previewRef.value = null;
     }
+}
+
+function onExteriorSelected(value) {
+    const existing = vehicles.value.find((v) => v.id === editingId.value);
+    handleFileSelection(value, selectedFile, imagePreview, existing?.image_url);
+}
+
+function onInteriorSelected(value) {
+    const existing = vehicles.value.find((v) => v.id === editingId.value);
+    handleFileSelection(value, selectedInteriorFile, interiorPreview, existing?.interior_image_url);
 }
 
 async function fetchData() {
@@ -458,6 +553,9 @@ function openCreateDialog() {
     imageInput.value = null;
     selectedFile.value = null;
     imagePreview.value = null;
+    interiorInput.value = null;
+    selectedInteriorFile.value = null;
+    interiorPreview.value = null;
     formError.value = '';
     formDialog.value = true;
 }
@@ -477,6 +575,9 @@ function openEditDialog(item) {
     imageInput.value = null;
     selectedFile.value = null;
     imagePreview.value = item.image_url || null;
+    interiorInput.value = null;
+    selectedInteriorFile.value = null;
+    interiorPreview.value = item.interior_image_url || null;
     formError.value = '';
     formDialog.value = true;
 }
@@ -507,6 +608,9 @@ async function saveVehicle() {
 
         if (selectedFile.value) {
             formData.append('image', selectedFile.value);
+        }
+        if (selectedInteriorFile.value) {
+            formData.append('interior_image', selectedInteriorFile.value);
         }
 
         if (editingId.value) {
