@@ -112,11 +112,6 @@ class BookingController extends Controller
 
         $booking->load(['customer', 'vehicle.category']);
 
-        $this->sendBookingEmail(
-            $booking,
-            "Car Rental Booking Receipt - {$booking->reference_code}"
-        );
-
         return response()->json($booking, 201);
     }
 

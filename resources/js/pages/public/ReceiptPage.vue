@@ -24,10 +24,22 @@
                 <BookingStatusChip :status="booking.status" />
             </div>
 
-            <v-alert type="success" variant="tonal" density="comfortable" class="mb-6 d-print-none">
-                Your reservation has been submitted. Save your reference code
-                <strong>{{ booking.reference_code }}</strong>. A copy of this receipt has also been sent to
-                <strong>{{ booking.customer?.email }}</strong>.
+            <v-alert
+                :type="booking.status === 'confirmed' ? 'success' : 'info'"
+                variant="tonal"
+                density="comfortable"
+                class="mb-6 d-print-none"
+            >
+                <template v-if="booking.status === 'confirmed'">
+                    Your booking is confirmed! Your official receipt and reference code
+                    <strong>{{ booking.reference_code }}</strong> have been sent to
+                    <strong>{{ booking.customer?.email }}</strong>.
+                </template>
+                <template v-else>
+                    Your reservation has been submitted! Save your reference code
+                    <strong>{{ booking.reference_code }}</strong>. Once an administrator confirms your booking,
+                    the official receipt will be sent to <strong>{{ booking.customer?.email }}</strong>.
+                </template>
             </v-alert>
 
             <v-row class="mb-4">

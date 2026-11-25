@@ -89,14 +89,8 @@ class BackendApiTest extends TestCase
         $referenceCode = $bookingRes->json('reference_code');
         $this->assertMatchesRegularExpression('/^BK-\d{8}-[A-Z0-9]{4}$/', $referenceCode);
 
-        Mail::assertSent(BookingConfirmation::class, function (BookingConfirmation $mail) use ($referenceCode) {
-            $html = $mail->render();
-            return str_contains($html, $referenceCode) && str_contains($html, 'Juan Dela Cruz');
-        });
-        $this->assertDatabaseHas('email_logs', [
-            'sent_to' => 'juan@gmail.com',
-            'status' => 'sent',
-        ]);
+        // Pending booking does not send receipt yet until admin confirms
+        Mail::assertNothingSent();
 
         // Overlapping booking must be rejected
         $this->postJson('/api/bookings', [
@@ -127,7 +121,7 @@ class BackendApiTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('customer.email', 'juan@gmail.com');
 
-        // Admin workflow: confirm -> release -> return late -> payment -> maintenance -> dashboard & reports
+        // Admin workflow: confirm (sends receipt email) -> release -> return late -> payment -> maintenance -> dashboard & reports
         Sanctum::actingAs($admin);
 
         $booking = Booking::where('reference_code', $referenceCode)->firstOrFail();
@@ -135,6 +129,15 @@ class BackendApiTest extends TestCase
         $this->postJson("/api/admin/bookings/{$booking->id}/confirm")
             ->assertStatus(200)
             ->assertJsonPath('status', 'confirmed');
+
+        Mail::assertSent(BookingConfirmation::class, function (BookingConfirmation $mail) use ($referenceCode) {
+            $html = $mail->render();
+            return str_contains($html, $referenceCode) && str_contains($html, 'Juan Dela Cruz');
+        });
+        $this->assertDatabaseHas('email_logs', [
+            'sent_to' => 'juan@gmail.com',
+            'status' => 'sent',
+        ]);
 
         $this->assertDatabaseHas('vehicles', [
             'id' => $vehicle->id,
