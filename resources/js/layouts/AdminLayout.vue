@@ -4,7 +4,7 @@
             v-model="drawer"
             color="#101D32"
             width="264"
-            class="border-0 admin-sidebar"
+            class="border-0 admin-sidebar d-print-none"
         >
             <!-- Brand Header -->
             <div class="pa-5 d-flex align-center">
@@ -73,7 +73,7 @@
             </template>
         </v-navigation-drawer>
 
-        <v-app-bar color="surface" elevation="0" height="68" style="border-bottom: 1px solid #E6E4DD;">
+        <v-app-bar color="surface" elevation="0" height="68" class="d-print-none" style="border-bottom: 1px solid #E6E4DD;">
             <v-app-bar-nav-icon color="primary" @click="drawer = !drawer" />
             <v-toolbar-title class="font-display text-h5 font-weight-bold" style="color: #101D32;">
                 {{ pageTitle }}

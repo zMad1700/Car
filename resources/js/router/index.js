@@ -13,6 +13,7 @@ import VehiclesPage from '@/pages/admin/VehiclesPage.vue';
 import CategoriesPage from '@/pages/admin/CategoriesPage.vue';
 import BookingsPage from '@/pages/admin/BookingsPage.vue';
 import RentalsPage from '@/pages/admin/RentalsPage.vue';
+import PaymentsPage from '@/pages/admin/PaymentsPage.vue';
 
 const routes = [
     {
@@ -100,12 +101,7 @@ const routes = [
             {
                 path: 'payments',
                 name: 'admin.payments',
-                component: PlaceholderPage,
-                props: {
-                    title: 'Payments',
-                    description: 'Payment recording will be implemented in Phase 8.',
-                    icon: 'mdi-cash-multiple',
-                },
+                component: PaymentsPage,
                 meta: { title: 'Admin - Payments', pageTitle: 'Payments' },
             },
             {
