@@ -1,7 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import PublicLayout from '@/layouts/PublicLayout.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
 import HomePage from '@/pages/public/HomePage.vue';
 import PlaceholderPage from '@/pages/public/PlaceholderPage.vue';
+import StaffPortalLogin from '@/pages/public/StaffPortalLogin.vue';
+import DashboardPage from '@/pages/admin/DashboardPage.vue';
 
 const routes = [
     {
@@ -39,13 +43,98 @@ const routes = [
             {
                 path: 'staff-portal',
                 name: 'staff-portal',
+                component: StaffPortalLogin,
+                meta: { title: 'Staff Portal', guestOnly: true },
+            },
+        ],
+    },
+    {
+        path: '/admin',
+        component: AdminLayout,
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: '',
+                name: 'admin.dashboard',
+                component: DashboardPage,
+                meta: { title: 'Admin - Dashboard', pageTitle: 'Dashboard' },
+            },
+            {
+                path: 'vehicles',
+                name: 'admin.vehicles',
                 component: PlaceholderPage,
                 props: {
-                    title: 'Staff Portal',
-                    description: 'Admin authentication will be implemented in Phase 3.',
-                    icon: 'mdi-shield-lock-outline',
+                    title: 'Vehicles Management',
+                    description: 'Vehicle CRUD will be implemented in Phase 4.',
+                    icon: 'mdi-car-multiple',
                 },
-                meta: { title: 'Staff Portal' },
+                meta: { title: 'Admin - Vehicles', pageTitle: 'Vehicles' },
+            },
+            {
+                path: 'categories',
+                name: 'admin.categories',
+                component: PlaceholderPage,
+                props: {
+                    title: 'Vehicle Categories',
+                    description: 'Category CRUD will be implemented in Phase 4.',
+                    icon: 'mdi-shape-outline',
+                },
+                meta: { title: 'Admin - Categories', pageTitle: 'Categories' },
+            },
+            {
+                path: 'bookings',
+                name: 'admin.bookings',
+                component: PlaceholderPage,
+                props: {
+                    title: 'Bookings Management',
+                    description: 'Bookings management will be implemented in Phase 8.',
+                    icon: 'mdi-calendar-check-outline',
+                },
+                meta: { title: 'Admin - Bookings', pageTitle: 'Bookings' },
+            },
+            {
+                path: 'rentals',
+                name: 'admin.rentals',
+                component: PlaceholderPage,
+                props: {
+                    title: 'Rentals Management',
+                    description: 'Vehicle release and return will be implemented in Phase 8.',
+                    icon: 'mdi-key-chain-variant',
+                },
+                meta: { title: 'Admin - Rentals', pageTitle: 'Rentals' },
+            },
+            {
+                path: 'payments',
+                name: 'admin.payments',
+                component: PlaceholderPage,
+                props: {
+                    title: 'Payments',
+                    description: 'Payment recording will be implemented in Phase 8.',
+                    icon: 'mdi-cash-multiple',
+                },
+                meta: { title: 'Admin - Payments', pageTitle: 'Payments' },
+            },
+            {
+                path: 'maintenance',
+                name: 'admin.maintenance',
+                component: PlaceholderPage,
+                props: {
+                    title: 'Maintenance',
+                    description: 'Vehicle maintenance CRUD will be implemented in Phase 9.',
+                    icon: 'mdi-wrench-outline',
+                },
+                meta: { title: 'Admin - Maintenance', pageTitle: 'Maintenance' },
+            },
+            {
+                path: 'reports',
+                name: 'admin.reports',
+                component: PlaceholderPage,
+                props: {
+                    title: 'Reports',
+                    description: 'Income, most rented, and overdue reports will be implemented in Phase 9.',
+                    icon: 'mdi-chart-box-outline',
+                },
+                meta: { title: 'Admin - Reports', pageTitle: 'Reports' },
             },
         ],
     },
@@ -61,6 +150,42 @@ const router = createRouter({
     scrollBehavior() {
         return { top: 0 };
     },
+});
+
+router.beforeEach(async (to) => {
+    const authStore = useAuthStore();
+
+    if (to.matched.some((record) => record.meta.requiresAuth)) {
+        if (!authStore.isAuthenticated) {
+            return {
+                name: 'staff-portal',
+                query: { redirect: to.fullPath },
+            };
+        }
+
+        if (!authStore.user) {
+            const user = await authStore.fetchUser();
+            if (!user) {
+                return {
+                    name: 'staff-portal',
+                    query: { redirect: to.fullPath },
+                };
+            }
+        }
+    }
+
+    if (to.matched.some((record) => record.meta.guestOnly) && authStore.isAuthenticated) {
+        if (!authStore.user) {
+            const user = await authStore.fetchUser();
+            if (user) {
+                return { name: 'admin.dashboard' };
+            }
+        } else {
+            return { name: 'admin.dashboard' };
+        }
+    }
+
+    return true;
 });
 
 router.afterEach((to) => {
