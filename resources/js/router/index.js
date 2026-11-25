@@ -6,6 +6,8 @@ import HomePage from '@/pages/public/HomePage.vue';
 import PlaceholderPage from '@/pages/public/PlaceholderPage.vue';
 import StaffPortalLogin from '@/pages/public/StaffPortalLogin.vue';
 import DashboardPage from '@/pages/admin/DashboardPage.vue';
+import VehiclesPage from '@/pages/admin/VehiclesPage.vue';
+import CategoriesPage from '@/pages/admin/CategoriesPage.vue';
 
 const routes = [
     {
@@ -62,24 +64,14 @@ const routes = [
             {
                 path: 'vehicles',
                 name: 'admin.vehicles',
-                component: PlaceholderPage,
-                props: {
-                    title: 'Vehicles Management',
-                    description: 'Vehicle CRUD will be implemented in Phase 4.',
-                    icon: 'mdi-car-multiple',
-                },
+                component: VehiclesPage,
                 meta: { title: 'Admin - Vehicles', pageTitle: 'Vehicles' },
             },
             {
                 path: 'categories',
                 name: 'admin.categories',
-                component: PlaceholderPage,
-                props: {
-                    title: 'Vehicle Categories',
-                    description: 'Category CRUD will be implemented in Phase 4.',
-                    icon: 'mdi-shape-outline',
-                },
-                meta: { title: 'Admin - Categories', pageTitle: 'Categories' },
+                component: CategoriesPage,
+                meta: { title: 'Admin - Categories', pageTitle: 'Vehicle Categories' },
             },
             {
                 path: 'bookings',
