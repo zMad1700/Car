@@ -25,7 +25,7 @@
             </div>
 
             <v-alert
-                :type="booking.status === 'confirmed' ? 'success' : 'info'"
+                :type="booking.status === 'confirmed' ? 'success' : (booking.status === 'cancelled' ? 'error' : 'info')"
                 variant="tonal"
                 density="comfortable"
                 class="mb-6 d-print-none"
@@ -34,6 +34,12 @@
                     Your booking is confirmed! Your official receipt and reference code
                     <strong>{{ booking.reference_code }}</strong> have been sent to
                     <strong>{{ booking.customer?.email }}</strong>.
+                </template>
+                <template v-else-if="booking.status === 'cancelled'">
+                    This booking has been cancelled.
+                    <span v-if="booking.cancellation_reason">
+                        <strong>Reason:</strong> {{ booking.cancellation_reason }}
+                    </span>
                 </template>
                 <template v-else>
                     Your reservation has been submitted! Save your reference code

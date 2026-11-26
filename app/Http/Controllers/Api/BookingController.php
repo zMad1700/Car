@@ -180,7 +180,7 @@ class BookingController extends Controller
         return response()->json($booking);
     }
 
-    public function cancel(Booking $booking): JsonResponse
+    public function cancel(Request $request, Booking $booking): JsonResponse
     {
         if (in_array($booking->status, ['cancelled', 'completed'], true)) {
             return response()->json([
@@ -194,8 +194,17 @@ class BookingController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($booking) {
-            $booking->update(['status' => 'cancelled']);
+        $validated = $request->validate([
+            'cancellation_reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        DB::transaction(function () use ($booking, $validated) {
+            $booking->update([
+                'status' => 'cancelled',
+                'cancellation_reason' => isset($validated['cancellation_reason']) && trim($validated['cancellation_reason']) !== ''
+                    ? trim($validated['cancellation_reason'])
+                    : null,
+            ]);
 
             if ($booking->vehicle->status === 'booked') {
                 $hasOtherActiveBooking = Booking::where('vehicle_id', $booking->vehicle_id)

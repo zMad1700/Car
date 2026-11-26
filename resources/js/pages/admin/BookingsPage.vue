@@ -201,6 +201,16 @@
                     <v-progress-linear v-if="loadingDetails" indeterminate color="secondary" class="mb-4" />
 
                     <template v-if="detailBooking">
+                        <v-alert
+                            v-if="detailBooking.status === 'cancelled' && detailBooking.cancellation_reason"
+                            type="error"
+                            variant="tonal"
+                            border="start"
+                            class="mb-4"
+                        >
+                            <strong>Cancellation Reason:</strong> {{ detailBooking.cancellation_reason }}
+                        </v-alert>
+
                         <v-row>
                             <v-col cols="12" md="6">
                                 <v-card variant="outlined" rounded="lg" class="pa-4 h-100" style="border-color: #E6E4DD;">
@@ -369,36 +379,66 @@
         </v-dialog>
 
         <!-- Confirm / Cancel Action Dialog -->
-        <v-dialog v-model="actionDialog" max-width="460">
+        <v-dialog v-model="actionDialog" max-width="520" persistent>
             <v-card class="luxury-card">
                 <v-card-title class="pa-5 font-display text-h6 font-weight-bold" style="color: #101D32;">
                     {{ actionType === 'confirm' ? 'Confirm Booking' : 'Cancel Booking' }}
                 </v-card-title>
-                <v-card-text class="px-5 pb-4">
-                    <p class="text-body-2 mb-2">
-                        Are you sure you want to
-                        <strong>{{ actionType === 'confirm' ? 'confirm' : 'cancel' }}</strong>
-                        booking <strong>{{ actionTarget?.reference_code }}</strong> for
-                        <strong>{{ actionTarget?.customer?.name }}</strong>?
-                    </p>
-                    <p class="text-caption mb-0" style="color: #777777;">
-                        A status update email will be sent to {{ actionTarget?.customer?.email }} and logged automatically.
-                    </p>
-                </v-card-text>
-                <v-card-actions class="pa-4">
-                    <v-spacer />
-                    <v-btn variant="text" color="primary" :disabled="acting" @click="actionDialog = false">
-                        Back
-                    </v-btn>
-                    <v-btn
-                        :color="actionType === 'confirm' ? 'primary' : 'error'"
-                        variant="flat"
-                        :loading="acting"
-                        @click="submitAction"
-                    >
-                        {{ actionType === 'confirm' ? 'Yes, Confirm' : 'Yes, Cancel' }}
-                    </v-btn>
-                </v-card-actions>
+                <v-form ref="actionFormRef" @submit.prevent="submitAction">
+                    <v-card-text class="px-5 pb-4">
+                        <p class="text-body-2 mb-3">
+                            Are you sure you want to
+                            <strong>{{ actionType === 'confirm' ? 'confirm' : 'cancel' }}</strong>
+                            booking <strong>{{ actionTarget?.reference_code }}</strong> for
+                            <strong>{{ actionTarget?.customer?.name }}</strong>?
+                        </p>
+
+                        <template v-if="actionType === 'cancel'">
+                            <v-textarea
+                                v-model="cancellationReason"
+                                label="Reason / Comment for Customer *"
+                                placeholder="e.g. Invalid or incomplete customer information."
+                                rows="3"
+                                auto-grow
+                                density="comfortable"
+                                :rules="[(v) => !!v?.trim() || 'Please enter a reason for cancellation.']"
+                                class="mb-2"
+                            />
+
+                            <div class="d-flex flex-wrap ga-1 mb-3">
+                                <v-chip
+                                    v-for="preset in cancelPresets"
+                                    :key="preset"
+                                    size="x-small"
+                                    variant="outlined"
+                                    color="primary"
+                                    class="cursor-pointer"
+                                    @click="cancellationReason = preset"
+                                >
+                                    {{ preset }}
+                                </v-chip>
+                            </div>
+                        </template>
+
+                        <p class="text-caption mb-0" style="color: #777777;">
+                            A status update email{{ actionType === 'cancel' ? ' (including your comment)' : '' }} will be sent to {{ actionTarget?.customer?.email }} and logged automatically.
+                        </p>
+                    </v-card-text>
+                    <v-card-actions class="pa-4">
+                        <v-spacer />
+                        <v-btn variant="text" color="primary" :disabled="acting" @click="actionDialog = false">
+                            Back
+                        </v-btn>
+                        <v-btn
+                            type="submit"
+                            :color="actionType === 'confirm' ? 'primary' : 'error'"
+                            variant="flat"
+                            :loading="acting"
+                        >
+                            {{ actionType === 'confirm' ? 'Yes, Confirm' : 'Yes, Cancel' }}
+                        </v-btn>
+                    </v-card-actions>
+                </v-form>
             </v-card>
         </v-dialog>
 
@@ -430,9 +470,18 @@ const loadingDetails = ref(false);
 const detailBooking = ref(null);
 
 const actionDialog = ref(false);
+const actionFormRef = ref(null);
 const actionType = ref('confirm');
 const actionTarget = ref(null);
+const cancellationReason = ref('');
 const acting = ref(false);
+
+const cancelPresets = [
+    'Invalid or incomplete customer information',
+    'Unreachable contact number',
+    'Vehicle unavailable due to schedule conflict',
+    'Customer requested cancellation',
+];
 
 const snackbar = reactive({
     show: false,
@@ -521,15 +570,25 @@ async function openDetails(item) {
 function openActionDialog(booking, type) {
     actionTarget.value = booking;
     actionType.value = type;
+    cancellationReason.value = '';
     actionDialog.value = true;
 }
 
 async function submitAction() {
     if (!actionTarget.value) return;
+
+    if (actionType.value === 'cancel' && actionFormRef.value) {
+        const { valid } = await actionFormRef.value.validate();
+        if (!valid) return;
+    }
+
     acting.value = true;
     try {
         const endpoint = `/admin/bookings/${actionTarget.value.id}/${actionType.value}`;
-        const { data } = await api.post(endpoint);
+        const payload = actionType.value === 'cancel'
+            ? { cancellation_reason: cancellationReason.value.trim() }
+            : {};
+        const { data } = await api.post(endpoint, payload);
 
         actionDialog.value = false;
         if (detailsDialog.value && detailBooking.value?.id === data.id) {

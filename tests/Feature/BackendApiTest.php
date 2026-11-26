@@ -230,5 +230,36 @@ class BackendApiTest extends TestCase
 
         $this->getJson('/api/admin/reports/most-rented')->assertStatus(200);
         $this->getJson('/api/admin/reports/overdue')->assertStatus(200);
+
+        // Cancelling a pending booking with a comment saves cancellation_reason and includes it in the email
+        $vehicle2 = Vehicle::factory()->create([
+            'category_id' => $category->id,
+            'daily_rate' => 1500,
+            'status' => 'available',
+        ]);
+
+        $cancelBookingRes = $this->postJson('/api/bookings', [
+            'vehicle_id' => $vehicle2->id,
+            'name' => 'Pedro Penduko',
+            'address' => 'Incomplete',
+            'contact_number' => '09170000000',
+            'email' => 'pedro@gmail.com',
+            'pickup_date' => now()->addDays(2)->toDateTimeString(),
+            'return_date' => now()->addDays(3)->toDateTimeString(),
+            'terms_accepted' => true,
+        ])->assertStatus(201);
+
+        $cancelId = $cancelBookingRes->json('id');
+
+        $this->postJson("/api/admin/bookings/{$cancelId}/cancel", [
+            'cancellation_reason' => 'The submitted address information is invalid.',
+        ])->assertStatus(200)
+            ->assertJsonPath('status', 'cancelled')
+            ->assertJsonPath('cancellation_reason', 'The submitted address information is invalid.');
+
+        Mail::assertSent(BookingConfirmation::class, function (BookingConfirmation $mail) use ($cancelId) {
+            return $mail->booking->id === $cancelId
+                && str_contains($mail->render(), 'The submitted address information is invalid.');
+        });
     }
 }

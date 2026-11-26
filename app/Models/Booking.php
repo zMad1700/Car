@@ -22,6 +22,7 @@ class Booking extends Model
         'daily_rate',
         'total_amount',
         'status',
+        'cancellation_reason',
     ];
 
     protected function casts(): array

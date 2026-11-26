@@ -83,6 +83,16 @@
                 <BookingStatusChip :status="booking.status" />
             </div>
 
+            <v-alert
+                v-if="booking.status === 'cancelled' && booking.cancellation_reason"
+                type="error"
+                variant="tonal"
+                border="start"
+                class="mb-5"
+            >
+                <strong>Reason for Cancellation:</strong> {{ booking.cancellation_reason }}
+            </v-alert>
+
             <v-row class="mb-4">
                 <v-col cols="12" sm="6">
                     <v-card variant="outlined" rounded="lg" class="pa-4 h-100" style="border-color: #E6E4DD;">
