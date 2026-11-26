@@ -147,7 +147,7 @@
                             prepend-icon="mdi-check"
                             @click="markDone(item)"
                         >
-                            Mark Done
+                            Set Available
                         </v-btn>
                         <v-btn
                             icon="mdi-pencil-outline"
@@ -311,11 +311,17 @@ const saving = ref(false);
 const deleting = ref(false);
 const formError = ref('');
 
+function localToday() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 const form = reactive({
     vehicle_id: null,
     description: '',
     cost: 0,
-    date_started: new Date().toISOString().slice(0, 10),
+    date_started: localToday(),
     date_finished: '',
     status: 'ongoing',
 });
@@ -407,7 +413,7 @@ function openCreateDialog() {
     form.vehicle_id = vehicles.value[0]?.id ?? null;
     form.description = '';
     form.cost = 0;
-    form.date_started = new Date().toISOString().slice(0, 10);
+    form.date_started = localToday();
     form.date_finished = '';
     form.status = 'ongoing';
     formError.value = '';
@@ -432,16 +438,20 @@ function openDeleteDialog(item) {
 }
 
 async function markDone(item) {
+    const started = item.date_started?.slice(0, 10) || localToday();
+    const today = localToday();
+    const finished = today >= started ? today : started;
+
     try {
         await api.put(`/admin/maintenance/${item.id}`, {
             vehicle_id: item.vehicle_id,
             description: item.description,
             cost: item.cost,
-            date_started: item.date_started?.slice(0, 10),
-            date_finished: new Date().toISOString().slice(0, 10),
+            date_started: started,
+            date_finished: finished,
             status: 'done',
         });
-        notify('Maintenance completed and vehicle status synced.');
+        notify('Maintenance completed — vehicle is now Available for booking.');
         await fetchData();
     } catch (error) {
         notify(error.response?.data?.message || 'Failed to mark done.', 'error');

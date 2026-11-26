@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Maintenance;
 use App\Models\Rental;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -109,8 +110,23 @@ class RentalController extends Controller
             $rental->booking->update(['status' => 'completed']);
 
             $vehicle = $rental->booking->vehicle;
-            $hasOngoingMaintenance = $vehicle->maintenances()->where('status', 'ongoing')->exists();
-            $vehicle->update(['status' => $hasOngoingMaintenance ? 'maintenance' : 'available']);
+            $vehicle->update(['status' => 'maintenance']);
+
+            $description = "Post-rental inspection ({$rental->booking->reference_code})";
+            if (! empty($validated['remarks'])) {
+                $description .= " — {$validated['remarks']}";
+            }
+
+            if (! $vehicle->maintenances()->where('status', 'ongoing')->exists()) {
+                Maintenance::create([
+                    'vehicle_id' => $vehicle->id,
+                    'description' => $description,
+                    'cost' => 0,
+                    'date_started' => now()->toDateString(),
+                    'date_finished' => null,
+                    'status' => 'ongoing',
+                ]);
+            }
         });
 
         $rental->load(['booking.customer', 'booking.vehicle.category', 'releasedBy']);

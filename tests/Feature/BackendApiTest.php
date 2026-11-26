@@ -159,7 +159,7 @@ class BackendApiTest extends TestCase
 
         $rentalId = $releaseRes->json('id');
 
-        // Return 1 day late -> penalty = 2000.00
+        // Return 1 day late -> penalty = 2000.00 and vehicle moves to maintenance for inspection
         $this->postJson("/api/admin/rentals/{$rentalId}/return", [
             'date_in' => $return->copy()->addDay()->toDateTimeString(),
             'odometer_in' => 15350,
@@ -170,7 +170,11 @@ class BackendApiTest extends TestCase
 
         $this->assertDatabaseHas('vehicles', [
             'id' => $vehicle->id,
-            'status' => 'available',
+            'status' => 'maintenance',
+        ]);
+        $this->assertDatabaseHas('maintenance', [
+            'vehicle_id' => $vehicle->id,
+            'status' => 'ongoing',
         ]);
 
         // Record payment
@@ -182,7 +186,26 @@ class BackendApiTest extends TestCase
         ])->assertStatus(201)
             ->assertJsonPath('method', 'gcash');
 
-        // Maintenance sets vehicle to maintenance and blocks booking
+        // Completing the post-rental maintenance restores vehicle to available
+        $postRentalMaint = \App\Models\Maintenance::where('vehicle_id', $vehicle->id)
+            ->where('status', 'ongoing')
+            ->firstOrFail();
+
+        $this->putJson("/api/admin/maintenance/{$postRentalMaint->id}", [
+            'description' => $postRentalMaint->description,
+            'cost' => 500,
+            'date_started' => $postRentalMaint->date_started->toDateString(),
+            'date_finished' => $postRentalMaint->date_started->toDateString(),
+            'status' => 'done',
+        ])->assertStatus(200)
+            ->assertJsonPath('status', 'done');
+
+        $this->assertDatabaseHas('vehicles', [
+            'id' => $vehicle->id,
+            'status' => 'available',
+        ]);
+
+        // New ongoing maintenance sets vehicle back to maintenance and blocks booking
         $maintRes = $this->postJson('/api/admin/maintenance', [
             'vehicle_id' => $vehicle->id,
             'description' => 'Change oil',

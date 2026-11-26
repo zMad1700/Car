@@ -79,6 +79,16 @@ class VehicleController extends Controller
         }
 
         $vehicle->update($validated);
+
+        if (($validated['status'] ?? null) === 'available') {
+            $vehicle->maintenances()
+                ->where('status', 'ongoing')
+                ->update([
+                    'status' => 'done',
+                    'date_finished' => now()->toDateString(),
+                ]);
+        }
+
         $vehicle->load('category');
 
         return response()->json($vehicle);

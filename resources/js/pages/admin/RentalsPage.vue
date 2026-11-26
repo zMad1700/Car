@@ -314,6 +314,7 @@
                             :type="estimatedPenalty > 0 ? 'warning' : 'success'"
                             variant="tonal"
                             density="comfortable"
+                            class="mb-3"
                         >
                             <template v-if="estimatedPenalty > 0">
                                 <strong>Late Return Penalty:</strong>
@@ -322,6 +323,10 @@
                             <template v-else>
                                 Returned on time — <strong>No late penalty (PHP 0.00)</strong>.
                             </template>
+                        </v-alert>
+
+                        <v-alert type="info" variant="tonal" density="compact">
+                            After return, the vehicle will automatically enter <strong>Maintenance</strong> for inspection until an admin marks it available.
                         </v-alert>
                     </v-card-text>
 
@@ -643,7 +648,7 @@ async function submitReturn() {
             remarks: returnForm.remarks?.trim() || null,
         });
         returnDialog.value = false;
-        notify('Vehicle returned successfully (status updated to available).');
+        notify('Vehicle returned and moved to Maintenance for post-rental inspection.');
         await fetchData();
     } catch (error) {
         const errors = error.response?.data?.errors;
