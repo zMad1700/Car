@@ -35,9 +35,31 @@
                 </v-chip>
             </div>
 
+            <!-- Interior Slide Controls (when multiple interior photos exist) -->
+            <template v-if="photoView === 'interior' && interiorList.length > 1">
+                <v-btn
+                    icon="mdi-chevron-left"
+                    size="x-small"
+                    color="white"
+                    variant="flat"
+                    class="position-absolute"
+                    style="left: 10px; top: 50%; transform: translateY(-50%); background: rgba(16, 29, 50, 0.72) !important; color: #FFFFFF !important;"
+                    @click.stop="prevInterior"
+                />
+                <v-btn
+                    icon="mdi-chevron-right"
+                    size="x-small"
+                    color="white"
+                    variant="flat"
+                    class="position-absolute"
+                    style="right: 10px; top: 50%; transform: translateY(-50%); background: rgba(16, 29, 50, 0.72) !important; color: #FFFFFF !important;"
+                    @click.stop="nextInterior"
+                />
+            </template>
+
             <!-- Exterior / Interior Switcher -->
             <div
-                v-if="vehicle.interior_image_url || vehicle.image_url"
+                v-if="interiorList.length || vehicle.image_url"
                 class="position-absolute bottom-0 left-0 right-0 pa-2 d-flex justify-center"
             >
                 <v-btn-toggle
@@ -57,9 +79,9 @@
                         size="x-small"
                         prepend-icon="mdi-car-seat"
                         class="px-3"
-                        :disabled="!vehicle.interior_image_url"
+                        :disabled="!interiorList.length"
                     >
-                        Interior
+                        Interior{{ interiorList.length > 1 ? ` (${interiorIndex + 1}/${interiorList.length})` : '' }}
                     </v-btn>
                 </v-btn-toggle>
             </div>
@@ -140,13 +162,31 @@ const props = defineProps({
 });
 
 const photoView = ref('exterior');
+const interiorIndex = ref(0);
+
+const interiorList = computed(() => {
+    if (Array.isArray(props.vehicle.interior_images) && props.vehicle.interior_images.length) {
+        return props.vehicle.interior_images;
+    }
+    return [props.vehicle.interior_image_url, props.vehicle.second_interior_image_url].filter(Boolean);
+});
 
 const currentImageUrl = computed(() => {
-    if (photoView.value === 'interior' && props.vehicle.interior_image_url) {
-        return props.vehicle.interior_image_url;
+    if (photoView.value === 'interior' && interiorList.value.length) {
+        return interiorList.value[interiorIndex.value] || interiorList.value[0];
     }
-    return props.vehicle.image_url || props.vehicle.interior_image_url || null;
+    return props.vehicle.image_url || interiorList.value[0] || null;
 });
+
+function prevInterior() {
+    if (!interiorList.value.length) return;
+    interiorIndex.value = (interiorIndex.value - 1 + interiorList.value.length) % interiorList.value.length;
+}
+
+function nextInterior() {
+    if (!interiorList.value.length) return;
+    interiorIndex.value = (interiorIndex.value + 1) % interiorList.value.length;
+}
 
 function formatMoney(value) {
     return Number(value || 0).toLocaleString('en-PH', {

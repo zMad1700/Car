@@ -247,6 +247,15 @@
                                 <v-icon icon="mdi-car-seat" size="48" color="grey" />
                             </v-sheet>
                         </v-col>
+                        <v-col v-if="viewingVehicle.second_interior_image_url" cols="12" sm="6">
+                            <div class="text-caption font-weight-bold mb-1" style="color: #777777;">INTERIOR CABIN PHOTO</div>
+                            <v-img
+                                :src="viewingVehicle.second_interior_image_url"
+                                height="200"
+                                cover
+                                class="rounded-lg border"
+                            />
+                        </v-col>
                     </v-row>
 
                     <v-row dense>
@@ -435,7 +444,7 @@
                             <v-col cols="12" sm="6">
                                 <v-file-input
                                     v-model="interiorInput"
-                                    label="Interior Photo (picture sa sulod)"
+                                    label="Interior Photo 1 (picture sa sulod)"
                                     accept="image/*"
                                     prepend-icon="mdi-car-seat"
                                     variant="outlined"
@@ -447,6 +456,28 @@
                                 <v-img
                                     v-if="interiorPreview"
                                     :src="interiorPreview"
+                                    height="150"
+                                    cover
+                                    class="mt-2 rounded-lg border bg-grey-lighten-4"
+                                />
+                            </v-col>
+
+                            <!-- Interior Photo 2 -->
+                            <v-col cols="12" sm="6">
+                                <v-file-input
+                                    v-model="interior2Input"
+                                    label="Interior Photo 2 (optional)"
+                                    accept="image/*"
+                                    prepend-icon="mdi-car-seat"
+                                    variant="outlined"
+                                    density="comfortable"
+                                    show-size
+                                    clearable
+                                    @update:model-value="onInterior2Selected"
+                                />
+                                <v-img
+                                    v-if="interior2Preview"
+                                    :src="interior2Preview"
                                     height="150"
                                     cover
                                     class="mt-2 rounded-lg border bg-grey-lighten-4"
@@ -536,6 +567,10 @@ const imagePreview = ref(null);
 const interiorInput = ref(null);
 const selectedInteriorFile = ref(null);
 const interiorPreview = ref(null);
+
+const interior2Input = ref(null);
+const selectedInterior2File = ref(null);
+const interior2Preview = ref(null);
 
 const statusOptions = ['available', 'booked', 'rented', 'maintenance'];
 
@@ -629,6 +664,11 @@ function onInteriorSelected(value) {
     handleFileSelection(value, selectedInteriorFile, interiorPreview, existing?.interior_image_url);
 }
 
+function onInterior2Selected(value) {
+    const existing = vehicles.value.find((v) => v.id === editingId.value);
+    handleFileSelection(value, selectedInterior2File, interior2Preview, existing?.second_interior_image_url);
+}
+
 async function fetchData() {
     loading.value = true;
     try {
@@ -668,6 +708,9 @@ function openCreateDialog() {
     interiorInput.value = null;
     selectedInteriorFile.value = null;
     interiorPreview.value = null;
+    interior2Input.value = null;
+    selectedInterior2File.value = null;
+    interior2Preview.value = null;
     formError.value = '';
     formDialog.value = true;
 }
@@ -690,6 +733,9 @@ function openEditDialog(item) {
     interiorInput.value = null;
     selectedInteriorFile.value = null;
     interiorPreview.value = item.interior_image_url || null;
+    interior2Input.value = null;
+    selectedInterior2File.value = null;
+    interior2Preview.value = item.second_interior_image_url || null;
     formError.value = '';
     formDialog.value = true;
 }
@@ -723,6 +769,9 @@ async function saveVehicle() {
         }
         if (selectedInteriorFile.value) {
             formData.append('interior_image', selectedInteriorFile.value);
+        }
+        if (selectedInterior2File.value) {
+            formData.append('interior_image_2', selectedInterior2File.value);
         }
 
         if (editingId.value) {

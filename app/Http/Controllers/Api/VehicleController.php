@@ -46,7 +46,7 @@ class VehicleController extends Controller
     {
         $validated = $this->validateVehicle($request);
 
-        foreach (['image', 'interior_image'] as $field) {
+        foreach (['image', 'interior_image', 'interior_image_2'] as $field) {
             if ($request->hasFile($field)) {
                 $validated[$field] = $request->file($field)->store('vehicles', 'public');
             }
@@ -71,7 +71,7 @@ class VehicleController extends Controller
     {
         $validated = $this->validateVehicle($request, $vehicle->id);
 
-        foreach (['image', 'interior_image'] as $field) {
+        foreach (['image', 'interior_image', 'interior_image_2'] as $field) {
             if ($request->hasFile($field)) {
                 $this->deleteStoredImage($vehicle->{$field});
                 $validated[$field] = $request->file($field)->store('vehicles', 'public');
@@ -104,6 +104,7 @@ class VehicleController extends Controller
 
         $this->deleteStoredImage($vehicle->image);
         $this->deleteStoredImage($vehicle->interior_image);
+        $this->deleteStoredImage($vehicle->interior_image_2);
 
         $vehicle->delete();
 
@@ -139,6 +140,7 @@ class VehicleController extends Controller
             'status' => ['sometimes', Rule::in(['available', 'booked', 'rented', 'maintenance'])],
             'image' => ['nullable', 'image', 'max:2048'],
             'interior_image' => ['nullable', 'image', 'max:2048'],
+            'interior_image_2' => ['nullable', 'image', 'max:2048'],
         ]);
     }
 }

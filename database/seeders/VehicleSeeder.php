@@ -81,7 +81,8 @@ class VehicleSeeder extends Seeder
                 'seats' => 12,
                 'daily_rate' => 4500.00,
                 'image' => 'images/vehicles/hiace.jpg',
-                'interior_image' => 'images/vehicles/van_interior.svg',
+                'interior_image' => 'images/vehicles/hiace_interior.jpg',
+                'interior_image_2' => 'images/vehicles/hiace_cabin.jpg',
                 'status' => 'available',
             ],
             [
@@ -126,6 +127,7 @@ class VehicleSeeder extends Seeder
                     'daily_rate' => $data['daily_rate'],
                     'image' => $data['image'],
                     'interior_image' => $data['interior_image'],
+                    'interior_image_2' => $data['interior_image_2'] ?? null,
                     'status' => $data['status'],
                 ]
             );

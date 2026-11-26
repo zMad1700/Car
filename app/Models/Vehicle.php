@@ -25,12 +25,15 @@ class Vehicle extends Model
         'daily_rate',
         'image',
         'interior_image',
+        'interior_image_2',
         'status',
     ];
 
     protected $appends = [
         'image_url',
         'interior_image_url',
+        'second_interior_image_url',
+        'interior_images',
     ];
 
     protected function casts(): array
@@ -53,6 +56,23 @@ class Vehicle extends Model
     {
         return Attribute::make(
             get: fn () => $this->resolveAssetUrl($this->interior_image),
+        );
+    }
+
+    protected function secondInteriorImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->resolveAssetUrl($this->interior_image_2),
+        );
+    }
+
+    protected function interiorImages(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => array_values(array_filter([
+                $this->interior_image_url,
+                $this->second_interior_image_url,
+            ])),
         );
     }
 
