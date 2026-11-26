@@ -17,7 +17,7 @@ class BookingConfirmation extends Mailable
         public Booking $booking,
         public string $customSubject = ''
     ) {
-        $this->booking->loadMissing(['customer', 'vehicle.category']);
+        $this->booking->loadMissing(['customer', 'vehicle.category', 'payments']);
     }
 
     public function envelope(): Envelope

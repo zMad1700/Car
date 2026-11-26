@@ -40,6 +40,14 @@ Thank you for booking with **Car Rental**. Here are your official booking receip
 - **Daily Rate:** PHP {{ number_format((float) $booking->daily_rate, 2) }}
 - **Total Days:** {{ $booking->total_days }} day(s)
 - **Total Amount:** **PHP {{ number_format((float) $booking->total_amount, 2) }}**
+@php
+    $paidAmount = (float) $booking->payments->sum('amount');
+    $remainingBalance = max(0, (float) $booking->total_amount - $paidAmount);
+@endphp
+@if ($paidAmount > 0)
+- **Downpayment / Paid:** PHP {{ number_format($paidAmount, 2) }}
+- **Remaining Balance:** **PHP {{ number_format($remainingBalance, 2) }}**
+@endif
 
 @if ($booking->status !== 'cancelled')
 ### Important Reminders

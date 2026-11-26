@@ -141,6 +141,9 @@
                         <div class="text-caption" style="color: rgba(255,255,255,0.75);">
                             {{ booking.total_days }} day(s) &times; PHP {{ formatMoney(booking.daily_rate) }}
                         </div>
+                        <div v-if="totalPaid > 0" class="text-caption mt-1" style="color: #A7F3D0;">
+                            Paid: PHP {{ formatMoney(totalPaid) }} &bull; Balance: PHP {{ formatMoney(remainingBalance) }}
+                        </div>
                     </v-col>
                 </v-row>
             </v-card>
@@ -166,7 +169,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import api from '@/plugins/axios';
 import BookingStatusChip from '@/components/BookingStatusChip.vue';
 
@@ -174,6 +177,14 @@ const formRef = ref(null);
 const searching = ref(false);
 const errorMessage = ref('');
 const booking = ref(null);
+
+const totalPaid = computed(() =>
+    (booking.value?.payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0)
+);
+
+const remainingBalance = computed(() =>
+    Math.max(0, Number(booking.value?.total_amount || 0) - totalPaid.value)
+);
 
 const form = reactive({
     reference_code: '',

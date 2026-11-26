@@ -7,6 +7,7 @@ use App\Mail\BookingConfirmation;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\EmailLog;
+use App\Models\Payment;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
 {
@@ -59,6 +61,8 @@ class BookingController extends Controller
             'pickup_date' => ['required', 'date', 'after_or_equal:' . now()->subMinutes(5)->toDateTimeString()],
             'return_date' => ['required', 'date', 'after:pickup_date'],
             'terms_accepted' => ['required', 'accepted'],
+            'downpayment_amount' => ['required', 'numeric', 'min:500'],
+            'downpayment_method' => ['required', Rule::in(['cash', 'gcash', 'card'])],
         ]);
 
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
@@ -83,7 +87,18 @@ class BookingController extends Controller
             ], 422);
         }
 
-        $booking = DB::transaction(function () use ($validated, $vehicle, $pickupDate, $returnDate) {
+        $totalDays = max(1, (int) ceil($pickupDate->diffInMinutes($returnDate) / 1440));
+        $dailyRate = (float) $vehicle->daily_rate;
+        $totalAmount = round($totalDays * $dailyRate, 2);
+        $downpaymentAmount = round((float) $validated['downpayment_amount'], 2);
+
+        if ($downpaymentAmount > $totalAmount) {
+            return response()->json([
+                'message' => 'Downpayment cannot exceed the total booking amount of PHP ' . number_format($totalAmount, 2) . '.',
+            ], 422);
+        }
+
+        $booking = DB::transaction(function () use ($validated, $vehicle, $pickupDate, $returnDate, $totalDays, $dailyRate, $totalAmount, $downpaymentAmount) {
             $customer = Customer::updateOrCreate(
                 ['email' => strtolower($validated['email'])],
                 [
@@ -93,11 +108,7 @@ class BookingController extends Controller
                 ]
             );
 
-            $totalDays = max(1, (int) ceil($pickupDate->diffInMinutes($returnDate) / 1440));
-            $dailyRate = (float) $vehicle->daily_rate;
-            $totalAmount = round($totalDays * $dailyRate, 2);
-
-            return Booking::create([
+            $booking = Booking::create([
                 'reference_code' => $this->generateReferenceCode(),
                 'customer_id' => $customer->id,
                 'vehicle_id' => $vehicle->id,
@@ -108,9 +119,20 @@ class BookingController extends Controller
                 'total_amount' => $totalAmount,
                 'status' => 'pending',
             ]);
+
+            Payment::create([
+                'booking_id' => $booking->id,
+                'amount' => $downpaymentAmount,
+                'type' => 'deposit',
+                'method' => $validated['downpayment_method'],
+                'receipt_number' => $this->generatePaymentReceiptNumber(),
+                'paid_at' => now(),
+            ]);
+
+            return $booking;
         });
 
-        $booking->load(['customer', 'vehicle.category']);
+        $booking->load(['customer', 'vehicle.category', 'payments']);
 
         return response()->json($booking, 201);
     }
@@ -124,7 +146,7 @@ class BookingController extends Controller
 
     public function receipt(string $referenceCode): JsonResponse
     {
-        $booking = Booking::with(['customer', 'vehicle.category'])
+        $booking = Booking::with(['customer', 'vehicle.category', 'payments'])
             ->where('reference_code', strtoupper(trim($referenceCode)))
             ->firstOrFail();
 
@@ -246,6 +268,17 @@ class BookingController extends Controller
         } while (Booking::where('reference_code', $code)->exists());
 
         return $code;
+    }
+
+    private function generatePaymentReceiptNumber(): string
+    {
+        $datePart = now()->format('Ymd');
+
+        do {
+            $number = 'RCP-' . $datePart . '-' . strtoupper(Str::random(4));
+        } while (Payment::where('receipt_number', $number)->exists());
+
+        return $number;
     }
 
     private function sendBookingEmail(Booking $booking, string $subject): void

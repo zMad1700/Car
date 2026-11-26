@@ -69,7 +69,21 @@ class BackendApiTest extends TestCase
         $pickup = now()->addDay()->setTime(9, 0);
         $return = now()->addDays(3)->setTime(9, 0); // 2 days => 4000
 
-        // Create booking
+        // Booking with downpayment below PHP 500 must be rejected
+        $this->postJson('/api/bookings', [
+            'vehicle_id' => $vehicle->id,
+            'name' => 'Juan Dela Cruz',
+            'address' => 'Cebu City',
+            'contact_number' => '09171234567',
+            'email' => 'juan@gmail.com',
+            'pickup_date' => $pickup->toDateTimeString(),
+            'return_date' => $return->toDateTimeString(),
+            'terms_accepted' => true,
+            'downpayment_amount' => 400,
+            'downpayment_method' => 'gcash',
+        ])->assertStatus(422);
+
+        // Create booking with valid PHP 500 downpayment
         $bookingRes = $this->postJson('/api/bookings', [
             'vehicle_id' => $vehicle->id,
             'name' => 'Juan Dela Cruz',
@@ -79,12 +93,21 @@ class BackendApiTest extends TestCase
             'pickup_date' => $pickup->toDateTimeString(),
             'return_date' => $return->toDateTimeString(),
             'terms_accepted' => true,
+            'downpayment_amount' => 500,
+            'downpayment_method' => 'gcash',
         ]);
 
         $bookingRes->assertStatus(201)
             ->assertJsonPath('total_days', 2)
             ->assertJsonPath('total_amount', '4000.00')
             ->assertJsonPath('status', 'pending');
+
+        $this->assertDatabaseHas('payments', [
+            'booking_id' => $bookingRes->json('id'),
+            'amount' => '500.00',
+            'type' => 'deposit',
+            'method' => 'gcash',
+        ]);
 
         $referenceCode = $bookingRes->json('reference_code');
         $this->assertMatchesRegularExpression('/^BK-\d{8}-[A-Z0-9]{4}$/', $referenceCode);
@@ -102,6 +125,8 @@ class BackendApiTest extends TestCase
             'pickup_date' => $pickup->copy()->addHours(2)->toDateTimeString(),
             'return_date' => $return->copy()->subHours(2)->toDateTimeString(),
             'terms_accepted' => true,
+            'downpayment_amount' => 500,
+            'downpayment_method' => 'gcash',
         ])->assertStatus(422);
 
         // Track booking requires matching reference code and email
@@ -226,7 +251,7 @@ class BackendApiTest extends TestCase
 
         $this->getJson('/api/admin/reports/income')
             ->assertStatus(200)
-            ->assertJsonPath('total_income', 6000);
+            ->assertJsonPath('total_income', 6500);
 
         $this->getJson('/api/admin/reports/most-rented')->assertStatus(200);
         $this->getJson('/api/admin/reports/overdue')->assertStatus(200);
@@ -247,6 +272,8 @@ class BackendApiTest extends TestCase
             'pickup_date' => now()->addDays(2)->toDateTimeString(),
             'return_date' => now()->addDays(3)->toDateTimeString(),
             'terms_accepted' => true,
+            'downpayment_amount' => 500,
+            'downpayment_method' => 'cash',
         ])->assertStatus(201);
 
         $cancelId = $cancelBookingRes->json('id');

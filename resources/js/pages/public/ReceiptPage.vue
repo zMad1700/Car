@@ -119,11 +119,30 @@
                     <span>Daily Rate</span>
                     <span>PHP {{ formatMoney(booking.daily_rate) }}</span>
                 </div>
-                <div class="d-flex justify-space-between text-body-2 mb-3" style="color: rgba(255,255,255,0.8);">
+                <div class="d-flex justify-space-between text-body-2 mb-1" style="color: rgba(255,255,255,0.8);">
                     <span>Total Days</span>
                     <span>{{ booking.total_days }} day(s)</span>
                 </div>
-                <div class="d-flex justify-space-between align-baseline">
+                <div class="d-flex justify-space-between text-body-2 mb-2" style="color: rgba(255,255,255,0.8);">
+                    <span>Total Booking Amount</span>
+                    <span>PHP {{ formatMoney(booking.total_amount) }}</span>
+                </div>
+                <template v-if="totalPaid > 0">
+                    <div class="d-flex justify-space-between text-body-2 mb-1" style="color: #A7F3D0;">
+                        <span>
+                            Downpayment / Paid
+                            <span v-if="firstPaymentReceipt">({{ firstPaymentReceipt }})</span>
+                        </span>
+                        <span>- PHP {{ formatMoney(totalPaid) }}</span>
+                    </div>
+                    <div class="d-flex justify-space-between align-baseline mt-2">
+                        <span class="text-subtitle-1 font-weight-bold">Remaining Balance</span>
+                        <span class="font-display text-h4 font-weight-bold" style="color: #C6A15B;">
+                            PHP {{ formatMoney(remainingBalance) }}
+                        </span>
+                    </div>
+                </template>
+                <div v-else class="d-flex justify-space-between align-baseline">
                     <span class="text-subtitle-1 font-weight-bold">Total Amount</span>
                     <span class="font-display text-h4 font-weight-bold" style="color: #C6A15B;">
                         PHP {{ formatMoney(booking.total_amount) }}
@@ -164,7 +183,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/plugins/axios';
 import BookingStatusChip from '@/components/BookingStatusChip.vue';
@@ -173,6 +192,18 @@ const route = useRoute();
 const booking = ref(null);
 const loading = ref(true);
 const error = ref('');
+
+const totalPaid = computed(() =>
+    (booking.value?.payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0)
+);
+
+const remainingBalance = computed(() =>
+    Math.max(0, Number(booking.value?.total_amount || 0) - totalPaid.value)
+);
+
+const firstPaymentReceipt = computed(() =>
+    booking.value?.payments?.[0]?.receipt_number || null
+);
 
 function formatMoney(value) {
     return Number(value || 0).toLocaleString('en-PH', {
