@@ -33,10 +33,7 @@ Thank you for booking with **Car Rental**. Here are your official booking receip
 ### Important Reminders
 - Please bring a **valid government ID** and your **driver's license** upon pickup.
 - **Late return penalty applies** if the vehicle is returned past the scheduled return date and time.
-
-<x-mail::button :url="url('/receipt/' . $booking->reference_code)">
-View Online Receipt
-</x-mail::button>
+- Keep your reference code (`{{ $booking->reference_code }}`) and email handy to track your booking status on our website anytime.
 
 Thanks,  
 {{ config('app.name', 'Car Rental') }}
