@@ -418,6 +418,44 @@
                                     {{ preset }}
                                 </v-chip>
                             </div>
+
+                            <!-- Simulated Refund Box (when customer already paid downpayment) -->
+                            <v-card
+                                v-if="targetNetPaid > 0"
+                                variant="outlined"
+                                rounded="lg"
+                                class="pa-3 mb-3"
+                                style="border-color: #C6A15B; background-color: #FAF9F6;"
+                            >
+                                <div class="text-caption font-weight-bold text-uppercase mb-1" style="color: #C6A15B;">
+                                    Downpayment Paid: PHP {{ formatMoney(targetNetPaid) }}
+                                </div>
+                                <v-checkbox
+                                    v-model="issueRefund"
+                                    color="primary"
+                                    density="compact"
+                                    hide-details
+                                    class="mb-2"
+                                >
+                                    <template #label>
+                                        <span class="text-body-2 font-weight-medium" style="color: #101D32;">
+                                            Issue simulated refund of PHP {{ formatMoney(targetNetPaid) }}
+                                        </span>
+                                    </template>
+                                </v-checkbox>
+                                <v-select
+                                    v-if="issueRefund"
+                                    v-model="refundMethod"
+                                    :items="[
+                                        { title: 'GCash (Simulated)', value: 'gcash' },
+                                        { title: 'Card (Simulated)', value: 'card' },
+                                        { title: 'Cash (Simulated)', value: 'cash' },
+                                    ]"
+                                    label="Refund Method"
+                                    density="compact"
+                                    hide-details
+                                />
+                            </v-card>
                         </template>
 
                         <p class="text-caption mb-0" style="color: #777777;">
@@ -449,7 +487,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import api from '@/plugins/axios';
 import BookingStatusChip from '@/components/BookingStatusChip.vue';
 
@@ -474,7 +512,14 @@ const actionFormRef = ref(null);
 const actionType = ref('confirm');
 const actionTarget = ref(null);
 const cancellationReason = ref('');
+const issueRefund = ref(true);
+const refundMethod = ref('gcash');
 const acting = ref(false);
+
+const targetNetPaid = computed(() => {
+    const payments = actionTarget.value?.payments || [];
+    return Math.max(0, payments.reduce((sum, p) => sum + Number(p.amount || 0), 0));
+});
 
 const cancelPresets = [
     'Invalid or incomplete customer information',
@@ -571,6 +616,10 @@ function openActionDialog(booking, type) {
     actionTarget.value = booking;
     actionType.value = type;
     cancellationReason.value = '';
+    const payments = booking?.payments || [];
+    const net = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+    issueRefund.value = net > 0;
+    refundMethod.value = payments[0]?.method || 'gcash';
     actionDialog.value = true;
 }
 
@@ -586,7 +635,11 @@ async function submitAction() {
     try {
         const endpoint = `/admin/bookings/${actionTarget.value.id}/${actionType.value}`;
         const payload = actionType.value === 'cancel'
-            ? { cancellation_reason: cancellationReason.value.trim() }
+            ? {
+                cancellation_reason: cancellationReason.value.trim(),
+                issue_refund: targetNetPaid.value > 0 ? issueRefund.value : false,
+                refund_method: refundMethod.value,
+            }
             : {};
         const { data } = await api.post(endpoint, payload);
 

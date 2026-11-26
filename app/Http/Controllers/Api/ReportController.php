@@ -31,6 +31,7 @@ class ReportController extends Controller
                 'deposit' => (float) $payments->where('type', 'deposit')->sum('amount'),
                 'rental' => (float) $payments->where('type', 'rental')->sum('amount'),
                 'penalty' => (float) $payments->where('type', 'penalty')->sum('amount'),
+                'refund' => (float) $payments->where('type', 'refund')->sum('amount'),
             ],
             'by_method' => [
                 'cash' => (float) $payments->where('method', 'cash')->sum('amount'),

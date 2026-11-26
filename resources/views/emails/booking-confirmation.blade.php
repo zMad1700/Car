@@ -12,6 +12,18 @@ We regret to inform you that your booking has been **cancelled**.
 {{ $booking->cancellation_reason }}
 </x-mail::panel>
 @endif
+@php
+    $refundPayment = $booking->payments->where('type', 'refund')->sortByDesc('id')->first();
+@endphp
+@if ($refundPayment)
+
+### Refund Issued (Simulated)
+<x-mail::panel>
+**Refund Amount:** PHP {{ number_format(abs((float) $refundPayment->amount), 2) }}  
+**Refund Method:** {{ strtoupper($refundPayment->method) }}  
+**Refund Reference:** `{{ $refundPayment->receipt_number }}`
+</x-mail::panel>
+@endif
 @else
 Thank you for booking with **Car Rental**. Here are your official booking receipt details:
 @endif
@@ -41,12 +53,17 @@ Thank you for booking with **Car Rental**. Here are your official booking receip
 - **Total Days:** {{ $booking->total_days }} day(s)
 - **Total Amount:** **PHP {{ number_format((float) $booking->total_amount, 2) }}**
 @php
-    $paidAmount = (float) $booking->payments->sum('amount');
-    $remainingBalance = max(0, (float) $booking->total_amount - $paidAmount);
+    $grossPaid = (float) $booking->payments->where('type', '!=', 'refund')->sum('amount');
+    $refundedAmount = abs((float) $booking->payments->where('type', 'refund')->sum('amount'));
+    $remainingBalance = max(0, (float) $booking->total_amount - $grossPaid);
 @endphp
-@if ($paidAmount > 0)
-- **Downpayment / Paid:** PHP {{ number_format($paidAmount, 2) }}
+@if ($grossPaid > 0)
+- **Downpayment / Paid:** PHP {{ number_format($grossPaid, 2) }}
+@if ($refundedAmount > 0)
+- **Refunded Amount:** PHP {{ number_format($refundedAmount, 2) }}
+@elseif ($booking->status !== 'cancelled')
 - **Remaining Balance:** **PHP {{ number_format($remainingBalance, 2) }}**
+@endif
 @endif
 
 @if ($booking->status !== 'cancelled')

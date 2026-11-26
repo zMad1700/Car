@@ -84,13 +84,20 @@
             </div>
 
             <v-alert
-                v-if="booking.status === 'cancelled' && booking.cancellation_reason"
+                v-if="booking.status === 'cancelled' && (booking.cancellation_reason || refundPayment)"
                 type="error"
                 variant="tonal"
                 border="start"
                 class="mb-5"
             >
-                <strong>Reason for Cancellation:</strong> {{ booking.cancellation_reason }}
+                <div v-if="booking.cancellation_reason">
+                    <strong>Reason for Cancellation:</strong> {{ booking.cancellation_reason }}
+                </div>
+                <div v-if="refundPayment" class="mt-1">
+                    <strong>Simulated Refund Issued:</strong>
+                    PHP {{ formatMoney(Math.abs(Number(refundPayment.amount))) }} via {{ refundPayment.method.toUpperCase() }}
+                    ({{ refundPayment.receipt_number }})
+                </div>
             </v-alert>
 
             <v-row class="mb-4">
@@ -179,7 +186,13 @@ const errorMessage = ref('');
 const booking = ref(null);
 
 const totalPaid = computed(() =>
-    (booking.value?.payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0)
+    (booking.value?.payments || [])
+        .filter((p) => p.type !== 'refund')
+        .reduce((sum, p) => sum + Number(p.amount || 0), 0)
+);
+
+const refundPayment = computed(() =>
+    (booking.value?.payments || []).find((p) => p.type === 'refund') || null
 );
 
 const remainingBalance = computed(() =>

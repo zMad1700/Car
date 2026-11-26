@@ -107,9 +107,13 @@
                                     <span style="color: #777777;">Rental</span>
                                     <strong>PHP {{ formatMoney(incomeReport.by_type?.rental) }}</strong>
                                 </div>
-                                <div class="d-flex justify-space-between text-body-2">
+                                <div class="d-flex justify-space-between text-body-2 mb-2">
                                     <span style="color: #777777;">Penalty</span>
                                     <strong>PHP {{ formatMoney(incomeReport.by_type?.penalty) }}</strong>
+                                </div>
+                                <div class="d-flex justify-space-between text-body-2">
+                                    <span style="color: #B83B3B;">Refunds</span>
+                                    <strong style="color: #B83B3B;">PHP {{ formatMoney(incomeReport.by_type?.refund) }}</strong>
                                 </div>
                             </v-card>
                         </v-col>

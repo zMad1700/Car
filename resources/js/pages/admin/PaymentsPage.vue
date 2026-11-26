@@ -267,7 +267,7 @@
                             <v-col cols="12" sm="6">
                                 <v-select
                                     v-model="form.type"
-                                    :items="typeOptions"
+                                    :items="recordTypeOptions"
                                     label="Payment Type *"
                                     density="comfortable"
                                     :rules="[(v) => !!v || 'Type is required.']"
@@ -422,6 +422,13 @@ const typeOptions = [
     { title: 'Deposit', value: 'deposit' },
     { title: 'Rental', value: 'rental' },
     { title: 'Penalty', value: 'penalty' },
+    { title: 'Refund', value: 'refund' },
+];
+
+const recordTypeOptions = [
+    { title: 'Deposit', value: 'deposit' },
+    { title: 'Rental', value: 'rental' },
+    { title: 'Penalty', value: 'penalty' },
 ];
 
 const methodOptions = [
@@ -538,7 +545,8 @@ function bookingLabel(b) {
 function typeColor(type) {
     if (type === 'deposit') return 'info';
     if (type === 'rental') return 'success';
-    if (type === 'penalty') return 'error';
+    if (type === 'penalty') return 'warning';
+    if (type === 'refund') return 'error';
     return 'grey';
 }
 

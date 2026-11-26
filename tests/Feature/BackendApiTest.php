@@ -280,13 +280,24 @@ class BackendApiTest extends TestCase
 
         $this->postJson("/api/admin/bookings/{$cancelId}/cancel", [
             'cancellation_reason' => 'The submitted address information is invalid.',
+            'issue_refund' => true,
+            'refund_method' => 'cash',
         ])->assertStatus(200)
             ->assertJsonPath('status', 'cancelled')
             ->assertJsonPath('cancellation_reason', 'The submitted address information is invalid.');
 
+        $this->assertDatabaseHas('payments', [
+            'booking_id' => $cancelId,
+            'type' => 'refund',
+            'amount' => '-500.00',
+            'method' => 'cash',
+        ]);
+
         Mail::assertSent(BookingConfirmation::class, function (BookingConfirmation $mail) use ($cancelId) {
+            $html = $mail->render();
             return $mail->booking->id === $cancelId
-                && str_contains($mail->render(), 'The submitted address information is invalid.');
+                && str_contains($html, 'The submitted address information is invalid.')
+                && str_contains($html, 'Refund Issued');
         });
     }
 }

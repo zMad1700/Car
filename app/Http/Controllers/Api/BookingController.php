@@ -218,6 +218,8 @@ class BookingController extends Controller
 
         $validated = $request->validate([
             'cancellation_reason' => ['nullable', 'string', 'max:1000'],
+            'issue_refund' => ['sometimes', 'boolean'],
+            'refund_method' => ['nullable', Rule::in(['cash', 'gcash', 'card'])],
         ]);
 
         DB::transaction(function () use ($booking, $validated) {
@@ -227,6 +229,21 @@ class BookingController extends Controller
                     ? trim($validated['cancellation_reason'])
                     : null,
             ]);
+
+            if (! empty($validated['issue_refund'])) {
+                $netPaid = round((float) $booking->payments()->sum('amount'), 2);
+                if ($netPaid > 0) {
+                    $defaultMethod = $booking->payments()->latest('id')->value('method') ?? 'cash';
+                    Payment::create([
+                        'booking_id' => $booking->id,
+                        'amount' => -$netPaid,
+                        'type' => 'refund',
+                        'method' => $validated['refund_method'] ?? $defaultMethod,
+                        'receipt_number' => $this->generatePaymentReceiptNumber('RFD'),
+                        'paid_at' => now(),
+                    ]);
+                }
+            }
 
             if ($booking->vehicle->status === 'booked') {
                 $hasOtherActiveBooking = Booking::where('vehicle_id', $booking->vehicle_id)
@@ -240,7 +257,7 @@ class BookingController extends Controller
             }
         });
 
-        $booking->load(['customer', 'vehicle.category']);
+        $booking->load(['customer', 'vehicle.category', 'payments']);
 
         $this->sendBookingEmail(
             $booking,
@@ -270,12 +287,12 @@ class BookingController extends Controller
         return $code;
     }
 
-    private function generatePaymentReceiptNumber(): string
+    private function generatePaymentReceiptNumber(string $prefix = 'RCP'): string
     {
         $datePart = now()->format('Ymd');
 
         do {
-            $number = 'RCP-' . $datePart . '-' . strtoupper(Str::random(4));
+            $number = $prefix . '-' . $datePart . '-' . strtoupper(Str::random(4));
         } while (Payment::where('receipt_number', $number)->exists());
 
         return $number;

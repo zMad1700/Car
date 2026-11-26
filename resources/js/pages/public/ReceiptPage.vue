@@ -40,6 +40,10 @@
                     <span v-if="booking.cancellation_reason">
                         <strong>Reason:</strong> {{ booking.cancellation_reason }}
                     </span>
+                    <span v-if="refundPayment">
+                        &bull; <strong>Refund Issued:</strong> PHP {{ formatMoney(Math.abs(Number(refundPayment.amount))) }}
+                        via {{ refundPayment.method.toUpperCase() }} ({{ refundPayment.receipt_number }})
+                    </span>
                 </template>
                 <template v-else>
                     Your reservation has been submitted! Save your reference code
@@ -194,7 +198,13 @@ const loading = ref(true);
 const error = ref('');
 
 const totalPaid = computed(() =>
-    (booking.value?.payments || []).reduce((sum, p) => sum + Number(p.amount || 0), 0)
+    (booking.value?.payments || [])
+        .filter((p) => p.type !== 'refund')
+        .reduce((sum, p) => sum + Number(p.amount || 0), 0)
+);
+
+const refundPayment = computed(() =>
+    (booking.value?.payments || []).find((p) => p.type === 'refund') || null
 );
 
 const remainingBalance = computed(() =>
